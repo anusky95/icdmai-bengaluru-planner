@@ -43,10 +43,10 @@ h1,h2,h3,h4{font-family:var(--display);font-weight:500;text-wrap:balance;margin:
 /* Hero */
 .hero{position:relative;overflow:hidden;background:#0a0908}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.8}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.5) 0%,rgba(10,9,8,.66) 45%,rgba(10,9,8,.88))}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.15) 20%,rgba(10,9,8,.78))}
 .hero .wrap{position:relative;z-index:1;padding-block:clamp(70px,13vw,150px) clamp(90px,12vw,120px);display:grid;gap:14px;justify-items:center;text-align:center;color:#FFF8E8}
 .hero .label{color:#E8CB7E}
-.hero h1{font-size:clamp(40px,8vw,84px);max-width:14ch;text-shadow:0 2px 28px rgba(0,0,0,.6)}
+.hero h1{font-size:clamp(40px,8vw,84px);max-width:14ch}
 .hero h1 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.05em}
 .hero p{margin:0;max-width:46ch;color:rgba(255,248,232,.86);font-size:17px}
 .hero .rule{width:96px;height:2px;background:var(--gold-grad);background-size:200% 100%;border-radius:2px}
@@ -240,7 +240,7 @@ footer li{break-inside:avoid;margin-bottom:3px}
     <span class="label">ICDMAI 2027 · 15–17 January</span>
     <h1>Bengaluru, <em>beautifully planned</em></h1>
     <span class="rule" aria-hidden="true"></span>
-    <p>Palaces, gardens, fine dining and rooftop evenings, arranged around your conference days, with an honest cab time for every ride.</p>
+    <p>Palaces, museums, temples, fine dining and rooftop lounges, arranged around your conference days, with an honest cab time for every ride.</p>
   </div>
   <span class="credit">Vidhana Soudha · Yashaswi.jayakumar, CC BY-SA 4.0</span>
 </header>
@@ -252,7 +252,6 @@ footer li{break-inside:avoid;margin-bottom:3px}
       <div class="f"><label for="depDate">Leaving</label><input type="date" id="depDate"></div>
       <div class="f"><label for="stay">Staying in</label><select id="stay"></select></div>
     </div>
-    <div class="chips" id="interests" role="group" aria-label="What you enjoy"></div>
     <details class="more"><summary>More options</summary>
       <div class="trip-more">
         <div class="f"><label for="speaker">Your name</label><input type="text" id="speaker" placeholder="Optional"></div>
@@ -300,16 +299,16 @@ const VENUE = { id:"venue", name:"Christ University, Central Campus", short:"Ven
 const AIRPORT = { id:"airport", name:"Kempegowda International Airport (BLR)", short:"Airport", lat:13.1989, lng:77.7068, q:"Kempegowda International Airport Bengaluru" };
 
 const STAYS = [
-  { id:"luxe", name:"UB City, Residency Road & MG Road", lat:12.9710, lng:77.6040, fit:["luxury","food","nightlife","art","heritage"],
-    blurb:"The five-star quarter. Fine dining, designer shopping and the best rooftop bars are all a short walk away. Expect 25–40 minutes to the venue in the morning.",
+  { id:"luxe", name:"UB City, Residency Road & MG Road", lat:12.9710, lng:77.6040, fit:[],
+    blurb:"The five-star quarter. Fine dining, designer shopping, museums and the best rooftop bars are all a short walk away. Expect 25–40 minutes to the venue in the morning.",
     eg:"The Ritz-Carlton, ITC Gardenia, The Oberoi, Taj MG Road" },
-  { id:"kora", name:"Koramangala & Hosur Road", lat:12.9340, lng:77.6180, fit:["close","food","nightlife"],
-    blurb:"Closest to the venue, 5–20 minutes away. Boutique hotels and serviced apartments, with the newest restaurants, breweries and cafés on your doorstep.",
+  { id:"kora", name:"Koramangala & Hosur Road", lat:12.9340, lng:77.6180, fit:["close"],
+    blurb:"Closest to the venue, 5–20 minutes away. Boutique hotels and serviced apartments, with new restaurants, breweries and cafés on your doorstep.",
     eg:"Boutique hotels and serviced apartments; check recent reviews" },
-  { id:"westend", name:"Race Course Road & Palace Road", lat:12.9840, lng:77.5790, fit:["heritage","nature","art"],
+  { id:"westend", name:"Race Course Road & Palace Road", lat:12.9840, lng:77.5790, fit:[],
     blurb:"Heritage-hotel living near Cubbon Park, Bangalore Palace and the galleries. Quiet and leafy. Allow 30–45 minutes to the venue.",
     eg:"Taj West End, set in 20 acres of gardens" },
-  { id:"oldairport", name:"Old Airport Road & Indiranagar", lat:12.9600, lng:77.6480, fit:["luxury","nightlife","food"],
+  { id:"oldairport", name:"Old Airport Road & Indiranagar", lat:12.9600, lng:77.6480, fit:[],
     blurb:"Luxury hotels close to Indiranagar's bars and restaurants. Fine for evenings, but mornings to the venue can take 35–55 minutes.",
     eg:"The Leela Palace and other luxury hotels along Old Airport Road" },
   { id:"whitefield", name:"Whitefield or Electronic City", lat:12.9698, lng:77.7500, fit:[], warn:true,
@@ -320,75 +319,130 @@ const STAYS = [
     eg:"Hotels along the airport road" }
 ];
 
-const INTERESTS = [
-  ["heritage","Palaces & heritage"],["art","Art & design"],["nature","Gardens & nature"],
-  ["luxury","Luxury & shopping"],["food","Fine dining"],["nightlife","Bars & nightlife"]
-];
+const INTERESTS = [];
 
 const H=(h,m=0)=>h*60+m;
 const PLACES = {
+  /* Heritage & palaces */
   palace:{name:"Bangalore Palace",area:"Palace Grounds",lat:12.9988,lng:77.5921,tier:"must",cats:["heritage"],dur:75,win:[[H(10),H(17,30)]],
     why:"A Tudor-style palace modelled on Windsor Castle, built for the Wodeyar kings. Carved wood, painted ceilings and an excellent audio guide.",best:"Morning"},
   cubbon:{name:"Vidhana Soudha & Cubbon Park",area:"Central",lat:12.9763,lng:77.5929,tier:"must",cats:["heritage","nature"],dur:60,win:[[H(6),H(18)]],
     why:"The granite seat of Karnataka's government, and the green park beside it. Lit up in gold on special evenings.",best:"7:00–10:00"},
-  lalbagh:{name:"Lalbagh Botanical Garden",area:"Lalbagh",lat:12.9507,lng:77.5848,tier:"must",cats:["nature","heritage"],dur:90,win:[[H(6),H(19)]],
-    why:"A 240-acre garden with a Glass House inspired by London's Crystal Palace and trees older than the city. Go early, when the light is soft.",best:"6:00–10:00"},
-  map:{name:"Museum of Art & Photography",area:"Kasturba Road",lat:12.9741,lng:77.5982,tier:"must",cats:["art"],dur:75,win:[[H(10),H(18,30)]],closed:[1],
-    why:"Bengaluru's leading art museum: South Asian art, photography and textiles in a striking contemporary building, with a good café.",best:"Any time"},
-  ngma:{name:"National Gallery of Modern Art",area:"Palace Road",lat:12.9905,lng:77.5862,tier:"should",cats:["art","heritage"],dur:60,win:[[H(10),H(17)]],closed:[1],
-    why:"Indian modern art in a colonial mansion with a quiet garden.",best:"Afternoon"},
   tipu:{name:"Tipu Sultan's Summer Palace",area:"Fort area",lat:12.9593,lng:77.5737,tier:"should",cats:["heritage"],dur:40,win:[[H(8,30),H(17,30)]],
     why:"An 18th-century teak palace with painted arches. Small, quick and full of history.",best:"Morning"},
-  ubcity:{name:"UB City",area:"Vittal Mallya Road",lat:12.9716,lng:77.5963,tier:"must",cats:["luxury","food"],dur:120,win:[[H(11),H(22)]],
-    why:"Bengaluru's luxury quarter: designer boutiques, glass towers and fine-dining restaurants around a central plaza.",best:"Afternoon to evening"},
+  stmarks:{name:"St Mark's Cathedral",area:"MG Road",lat:12.9757,lng:77.6000,tier:"should",cats:["heritage","spiritual"],dur:30,win:[[H(9),H(17)]],
+    why:"Founded in 1808, with architecture inspired by St Paul's Cathedral in London. A calm, cool stop between museums.",best:"Morning"},
+  stmarys:{name:"St Mary's Basilica",area:"Shivajinagar",lat:12.9853,lng:77.6060,tier:"should",cats:["heritage","spiritual"],dur:30,win:[[H(6),H(21)]],
+    why:"A Gothic basilica with tall spires and stained glass, in the middle of a lively bazaar district. Free to enter.",best:"Any time"},
+  /* Museums & science */
+  map:{name:"Museum of Art & Photography (MAP)",area:"Kasturba Road",lat:12.9741,lng:77.5982,tier:"must",cats:["art","museums"],dur:75,win:[[H(10),H(18,30)]],closed:[1],
+    why:"Bengaluru's leading art museum: South Asian art, photography and textiles in a striking contemporary building, with a good café.",best:"Any time"},
+  vitm:{name:"Visvesvaraya Industrial & Technological Museum",area:"Kasturba Road",lat:12.9752,lng:77.5963,tier:"should",cats:["museums"],dur:75,win:[[H(10),H(18)]],
+    why:"Five floors of hands-on science and engineering, from engines to space. A nod to the city's tech roots.",best:"Late morning"},
+  sciencegallery:{name:"Science Gallery Bengaluru",area:"Bellary Road",lat:13.0280,lng:77.5880,tier:"should",cats:["museums","art"],dur:75,win:[[H(10),H(18)]],closed:[1,2],
+    why:"A free gallery where science meets art, run with the city's research institutes. The 2026–27 season, Quantum, explores physics through art.",best:"Afternoon"},
+  hal:{name:"HAL Heritage Centre & Aerospace Museum",area:"Old Airport Road",lat:12.9510,lng:77.6820,tier:"should",cats:["museums"],dur:90,win:[[H(9),H(16,30)]],
+    why:"Real fighter jets, helicopters and engines from India's aviation history, out in the open. Great for anyone who likes aircraft.",best:"Morning"},
+  planetarium:{name:"Jawaharlal Nehru Planetarium",area:"High Grounds",lat:12.9846,lng:77.5896,tier:"should",cats:["museums"],dur:60,win:[[H(10,30),H(17,30)]],closed:[1],
+    why:"Sky shows under a big dome and a science park outside. Check show times on arrival.",best:"Afternoon"},
+  ime:{name:"Indian Music Experience",area:"JP Nagar",lat:12.8930,lng:77.5850,tier:"should",cats:["museums","art"],dur:90,win:[[H(10),H(18)]],closed:[1],
+    why:"An interactive music museum: play Indian instruments, hear the stories behind them and explore music from across the country.",best:"Late morning"},
+  /* Art, culture, folk & tribal */
+  ngma:{name:"National Gallery of Modern Art",area:"Palace Road",lat:12.9905,lng:77.5862,tier:"should",cats:["art","museums"],dur:60,win:[[H(10),H(17)]],closed:[1],
+    why:"Indian modern art in a colonial mansion with a quiet garden.",best:"Afternoon"},
+  chitrakala:{name:"Karnataka Chitrakala Parishath",area:"Kumara Krupa Road",lat:12.9893,lng:77.5806,tier:"should",cats:["art","museums"],dur:60,win:[[H(10),H(17,30)]],
+    why:"An art campus with galleries of folk art, Mysore paintings and leather shadow puppets, plus changing contemporary shows.",best:"Late morning"},
+  janapada:{name:"Janapada Loka folk museum",area:"Ramanagara, on the Mysuru road",lat:12.7200,lng:77.3000,tier:"should",cats:["art","museums"],dur:75,win:[[H(9,30),H(17,30)]],closed:[2],kind:"daytrip",
+    why:"Karnataka's folk and tribal heritage: Yakshagana costumes, masks, puppets, farm tools and village crafts. An easy stop on the way to Mysuru.",best:"Morning"},
   crafts:{name:"Cauvery Arts & Crafts Emporium",area:"MG Road",lat:12.9740,lng:77.6075,tier:"should",cats:["luxury","art"],dur:45,win:[[H(10),H(19)]],
     why:"A government emporium of Karnataka crafts: sandalwood, rosewood inlay, silk and Channapatna toys. Fixed prices and good gifts.",best:"Late morning"},
+  /* Spiritual */
+  iskcon:{name:"ISKCON Sri Radha Krishna Temple",area:"Rajajinagar",lat:13.0098,lng:77.5511,tier:"must",cats:["spiritual","heritage"],dur:60,win:[[H(4,15),H(13)],[H(16),H(20,20)]],
+    why:"A grand hilltop temple complex with gold-topped towers, chanting and a busy, joyful atmosphere. Shoes off at the entrance.",best:"Morning or evening"},
+  bulltemple:{name:"Bull Temple & Dodda Ganesha",area:"Basavanagudi",lat:12.9426,lng:77.5682,tier:"should",cats:["spiritual","heritage"],dur:45,win:[[H(6),H(12)],[H(17,30),H(20,30)]],
+    why:"A 16th-century temple with a giant Nandi bull carved from a single rock, and a huge Ganesha next door. Closes in the afternoon.",best:"Morning"},
+  gavi:{name:"Gavi Gangadhareshwara Cave Temple",area:"Gavipuram",lat:12.9483,lng:77.5653,tier:"should",cats:["spiritual","heritage"],dur:40,win:[[H(6),H(12)],[H(17,30),H(20,30)]],
+    why:"An ancient temple carved into a rock cave, with giant stone discs and tridents in the courtyard. On Makar Sankranti, sunlight passes between the horns of a stone bull to light up the shrine.",best:"Morning"},
+  adiyogi:{name:"Adiyogi, Chikkaballapur",area:"65 km north",lat:13.4100,lng:77.7000,tier:"should",cats:["spiritual"],dur:60,win:[[H(6),H(20)]],kind:"daytrip",
+    why:"A 112-foot steel face of Adiyogi (Shiva) at the Isha Foundation's centre, unveiled in 2023. A light and sound show is projected on it every evening at 19:00.",best:"Daytime or the 19:00 show"},
+  /* Gardens & nature */
+  lalbagh:{name:"Lalbagh Botanical Garden",area:"Lalbagh",lat:12.9507,lng:77.5848,tier:"must",cats:["nature","heritage"],dur:90,win:[[H(6),H(19)]],
+    why:"A 240-acre garden with a Glass House inspired by London's Crystal Palace and trees older than the city. Go early, when the light is soft.",best:"6:00–10:00"},
+  bannerghatta:{name:"Bannerghatta Biological Park",area:"South, 22 km",lat:12.8003,lng:77.5770,tier:"should",cats:["nature"],dur:210,win:[[H(9,30),H(17)]],closed:[2],
+    why:"Safari through lion and tiger enclosures, plus a butterfly park.",best:"Opening time"},
+  /* Luxury */
+  ubcity:{name:"UB City",area:"Vittal Mallya Road",lat:12.9716,lng:77.5963,tier:"must",cats:["luxury"],dur:120,win:[[H(11),H(22)]],
+    why:"Bengaluru's luxury quarter: designer boutiques, glass towers and fine-dining restaurants around a central plaza.",best:"Afternoon to evening"},
+  /* Evenings */
   skyye:{name:"Sunset at Skyye",area:"UB City",lat:12.9716,lng:77.5963,tier:"must",cats:["nightlife","luxury"],dur:120,win:[[H(17),H(23,30)]],kind:"evening",
-    why:"A rooftop bar at the top of UB City with 360-degree views of the skyline. Reserve a table for sunset, about 18:15 in January.",best:"Sunset"},
-  indiranagar:{name:"Indiranagar: Soka, Toit & Loft 38",area:"Indiranagar",lat:12.9719,lng:77.6412,tier:"should",cats:["nightlife","food","luxury"],dur:150,win:[[H(17),H(23,30)]],kind:"evening",
-    why:"Soka is No. 18 on Asia's 50 Best Bars 2026. Around it are the Toit brewpub, Loft 38 and Bengaluru's busiest restaurant strip.",best:"Evening"},
+    why:"A rooftop lounge at the top of UB City with 360-degree views of the skyline. Reserve a table for sunset, about 18:15 in January.",best:"Sunset"},
+  highultra:{name:"High Ultra Lounge",area:"World Trade Center, Malleshwaram",lat:13.0130,lng:77.5550,tier:"should",cats:["nightlife","luxury"],dur:150,win:[[H(18),H(23,30)]],kind:"evening",
+    why:"Often called the highest lounge bar in South India: cocktails and Asian food at the top of the World Trade Center.",best:"After dark"},
+  copitas:{name:"Copitas at the Four Seasons",area:"Bellary Road",lat:13.0170,lng:77.5920,tier:"should",cats:["nightlife","luxury"],dur:120,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"An award-winning cocktail bar on the hotel's 21st floor, with sundowners until 19:30. Smart-casual dress code.",best:"Sundowners"},
+  dali:{name:"Dali & Gala",area:"Museum Road",lat:12.9720,lng:77.6070,tier:"should",cats:["nightlife","art"],dur:120,win:[[H(18),H(23,30)]],kind:"evening",
+    why:"A surrealist cocktail bar, a tribute to Salvador Dalí and his muse Gala. No. 9 on India's 30 Best Bars 2025.",best:"Evening"},
+  leelabars:{name:"ZLB23 & The Library Bar at The Leela",area:"Old Airport Road",lat:12.9604,lng:77.6485,tier:"should",cats:["nightlife","luxury"],dur:120,win:[[H(18),H(23,30)]],kind:"evening",
+    why:"Two of India's best-regarded hotel bars, inside The Leela Palace: a jazz-age speakeasy and a wood-panelled library bar.",best:"Evening"},
+  nila:{name:"Dinner at Nila",area:"Cambridge Road, Ulsoor",lat:12.9740,lng:77.6290,tier:"should",cats:["food","luxury"],dur:180,win:[[H(19),H(23)]],kind:"evening",
+    why:"A 24-seat, 12-course tasting menu by chef Rahul Sharma, telling a new story of Indian regional food each season. Book well ahead.",best:"From 19:00"},
+  indiranagar:{name:"Indiranagar: Soka, Toit & Loft 38",area:"Indiranagar",lat:12.9719,lng:77.6412,tier:"should",cats:["nightlife","food"],dur:150,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"Soka is No. 18 on Asia's 50 Best Bars 2026. Around it are the Toit brewpub, Loft 38 and the city's busiest restaurant strip.",best:"Evening"},
   churchst:{name:"MG Road rooftops & Church Street",area:"Central",lat:12.9755,lng:77.6050,tier:"should",cats:["nightlife","food"],dur:150,win:[[H(17),H(23,30)]],kind:"evening",
     why:"The 13th Floor rooftop bar, karaoke at Hard Rock Cafe, and a walkable street of bars and bookshops.",best:"Evening"},
   koramangala:{name:"Koramangala: breweries & karaoke",area:"Koramangala",lat:12.9345,lng:77.6266,tier:"should",cats:["nightlife","food"],dur:120,win:[[H(17),H(23,30)]],kind:"evening",
-    why:"Ten minutes from the venue: craft breweries, rooftop bars and karaoke at The Boozy Griffin. Book tables on District or Zomato.",best:"Evening"},
-  bannerghatta:{name:"Bannerghatta Biological Park",area:"South, 22 km",lat:12.8003,lng:77.5770,tier:"should",cats:["nature"],dur:210,win:[[H(9,30),H(17)]],closed:[2],
-    why:"Safari through lion and tiger enclosures, plus a butterfly park. A good half-day for families.",best:"Opening time"},
+    why:"Ten minutes from the venue: craft breweries, rooftop bars and karaoke at The Boozy Griffin.",best:"Evening"},
+  rangashankara:{name:"A play at Ranga Shankara",area:"JP Nagar",lat:12.9107,lng:77.5858,tier:"should",cats:["art"],dur:150,win:[[H(19),H(22)]],closed:[1],kind:"evening",
+    why:"Bengaluru's best-loved theatre, with a play almost every evening, some in English. Check the listings.",best:"19:30 shows"},
+  /* Day trips */
   nandi:{name:"Nandi Hills sunrise",area:"60 km north",lat:13.3702,lng:77.6835,tier:"must",cats:["nature"],dur:150,win:[[H(6),H(18)]],kind:"daytrip",
     why:"Watch the sun rise over a sea of clouds from an old hill fort. January mornings are cold and often foggy, so bring a jacket.",best:"Arrive by 6:15"},
   grover:{name:"Grover Zampa Vineyards",area:"Near Nandi Hills",lat:13.3300,lng:77.6000,tier:"should",cats:["food","luxury"],dur:90,win:[[H(11),H(17)]],kind:"daytrip",
     why:"Bengaluru's own wine country. One of India's best-known wineries offers vineyard tours and tastings at the foot of Nandi Hills. Book ahead.",best:"Late morning"},
-  srirangapatna:{name:"Srirangapatna",area:"Near Mysuru",lat:12.4220,lng:76.6930,tier:"should",cats:["heritage"],dur:75,win:[[H(8),H(17,30)]],kind:"daytrip",
+  srirangapatna:{name:"Srirangapatna",area:"Near Mysuru",lat:12.4220,lng:76.6930,tier:"should",cats:["heritage","spiritual"],dur:75,win:[[H(8),H(17,30)]],kind:"daytrip",
     why:"Tipu Sultan's island fortress town: the Daria Daulat palace and the Ranganathaswamy temple.",best:"Morning"},
   mysorepalace:{name:"Mysuru Palace",area:"Mysuru, 145 km",lat:12.3052,lng:76.6552,tier:"must",cats:["heritage"],dur:100,win:[[H(10),H(17,30)]],kind:"daytrip",
     why:"One of India's most spectacular palaces. On Sunday evenings it is lit with about 100,000 bulbs (19:00–19:45).",best:"Midday"},
-  chamundi:{name:"Chamundi Hill",area:"Mysuru",lat:12.2724,lng:76.6730,tier:"should",cats:["heritage","nature"],dur:60,win:[[H(7,30),H(21)]],kind:"daytrip",
+  chamundi:{name:"Chamundi Hill",area:"Mysuru",lat:12.2724,lng:76.6730,tier:"should",cats:["spiritual","nature"],dur:60,win:[[H(7,30),H(21)]],kind:"daytrip",
     why:"A hilltop temple with a view over Mysuru and a giant Nandi carved from one rock.",best:"Late afternoon"}
 };
 Object.entries(PLACES).forEach(([id,p])=>{p.id=id; p.kind=p.kind||"sight";});
 
 const CLUSTERS = [
-  { id:"heritage", title:"Garden city and royal Bengaluru", evening:true,
-    stops:[{p:"lalbagh",pri:1,at:H(7,30)},{p:"tipu",pri:2},{p:"cubbon",pri:1}],
-    lunch:"Lunch in a hotel restaurant on Residency Road or in UB City (book on District or Zomato)",
-    gap:"Afternoon at leisure. Many five-star hotels have a spa, or try a specialty coffee in Cubbon Park's cafés." },
-  { id:"palaces", title:"Palaces and art", evening:true,
-    stops:[{p:"palace",pri:1,at:H(10)},{p:"ngma",pri:2},{p:"map",pri:1}],
-    lunch:"Lunch at the café at MAP, or a modern restaurant nearby",
+  { id:"museums", title:"Museum mile: Cubbon Park, MAP and the science museum", evening:true,
+    stops:[{p:"cubbon",pri:1,at:H(9)},{p:"map",pri:1},{p:"vitm",pri:2},{p:"stmarks",pri:3}],
+    lunch:"Lunch at the café at MAP, or a restaurant on Lavelle Road (book on District or Zomato)",
     gap:"Free time before the evening." },
-  { id:"luxury", title:"Craft, design and luxury shopping", evening:true,
-    stops:[{p:"crafts",pri:2,at:H(11)},{p:"ubcity",pri:1}],
-    lunch:"Lunch at a restaurant in UB City or on Lavelle Road (book on District or Zomato)",
+  { id:"heritage", title:"Garden city, temples and Tipu's palace", evening:true,
+    stops:[{p:"lalbagh",pri:1,at:H(7,30)},{p:"bulltemple",pri:2},{p:"gavi",pri:2},{p:"tipu",pri:2}],
+    lunch:"Lunch at a modern café in Jayanagar or back near your hotel",
+    gap:"Afternoon at leisure. Many five-star hotels have a spa." },
+  { id:"palaces", title:"Bangalore Palace and the art galleries", evening:true,
+    stops:[{p:"palace",pri:1,at:H(10)},{p:"ngma",pri:1},{p:"chitrakala",pri:2},{p:"planetarium",pri:3}],
+    lunch:"Lunch at a hotel restaurant near Palace Road",
+    gap:"Free time before the evening." },
+  { id:"north", title:"ISKCON and the Science Gallery", evening:true,
+    stops:[{p:"iskcon",pri:1,at:H(9)},{p:"sciencegallery",pri:1}],
+    lunch:"Lunch near Malleshwaram or at your hotel",
+    gap:"Afternoon at leisure." },
+  { id:"luxury", title:"Crafts, a basilica and luxury shopping", evening:true,
+    stops:[{p:"crafts",pri:2,at:H(11)},{p:"stmarys",pri:3},{p:"ubcity",pri:1}],
+    lunch:"Lunch at a restaurant in UB City or on Lavelle Road",
     gap:"Afternoon at your hotel's spa or pool." },
-  { id:"nandi", title:"Nandi Hills sunrise and wine country", daytrip:true, sunrise:true, evening:true,
-    stops:[{p:"nandi",pri:1,at:H(6,15)},{p:"grover",pri:2}],
+  { id:"nandi", title:"Nandi Hills sunrise, Adiyogi and wine country", daytrip:true, sunrise:true, evening:true,
+    stops:[{p:"nandi",pri:1,at:H(6,15)},{p:"adiyogi",pri:2},{p:"grover",pri:2}],
     afterNote:"Rest this afternoon. You started before 5." },
-  { id:"mysore", title:"Day trip to Mysuru and Srirangapatna", daytrip:true, long:true,
-    stops:[{p:"srirangapatna",pri:2,at:H(9,30)},{p:"mysorepalace",pri:1},{p:"chamundi",pri:2}],
+  { id:"mysore", title:"Day trip: folk art, Srirangapatna and Mysuru Palace", daytrip:true, long:true,
+    stops:[{p:"janapada",pri:2,at:H(9,30)},{p:"srirangapatna",pri:2},{p:"mysorepalace",pri:1},{p:"chamundi",pri:3}],
     lunch:"Lunch in Mysuru, then a box of Mysore pak to take home",
     gap:"" },
-  { id:"bannerghatta", title:"Bannerghatta safari and a lazy evening", evening:true,
-    stops:[{p:"bannerghatta",pri:1,at:H(9,30)}],
-    afterNote:"Afternoon rest at the hotel." }
+  { id:"south", title:"Music museum and a tiger safari", evening:true,
+    stops:[{p:"ime",pri:1,at:H(10)},{p:"bannerghatta",pri:2}],
+    lunch:"Lunch on the way to Bannerghatta",
+    gap:"" },
+  { id:"east", title:"Aerospace museum and Indiranagar", evening:true,
+    stops:[{p:"hal",pri:1,at:H(10)}],
+    afterNote:"Afternoon at leisure before the evening." }
 ];
 
 /* Bengaluru climate normals by month: high, low, rainy days, note */
@@ -598,7 +652,7 @@ function buildPlan(){
       const c=assign[key];
       if(c){
         const defs=paceFilter(c.stops,prefs.pace);
-        const r=runStops(defs,hotel,date,H(7),{lunch:c.lunch,gap:c.gap,endBy:c.long?H(22,30):H(22)});
+        const r=runStops(defs,hotel,date,c.sunrise?H(4):H(7),{lunch:c.lunch,gap:c.gap,endBy:c.long?H(22,30):H(22)});
         items.push(...r.items);notes.push(...r.notes);
         if(c.id==="mysore"&&dow===0)notes.push("It's Sunday: stay for the palace illumination, 19:00–19:45, and you'll be back in Bengaluru close to midnight.");
         let t=r.t;
@@ -617,6 +671,7 @@ function buildPlan(){
           items.push(...f.items);
           if(f.cur!==hotel){const back=legItem(f.cur,hotel,f.t,date);items.push(back,{type:"event",start:f.t+back.mid,name:"Back at the hotel"});}
           if(f.items.length===0&&isArr)items.push({type:"event",start:s,name:"Free afternoon",meta:"A slow walk around your neighbourhood is the best cure for jet lag."});
+          if(f.items.length===0&&isDep)items.push({type:"event",start:s,name:"Free morning",meta:"Last-minute gifts at UB City or the Cauvery Emporium, or a treatment at your hotel spa."});
         }
         if(!isDep&&end>=H(21)&&(prefs.pace!=="relaxed"||!isArr)){
           const st=Math.max(start,H(18,30)),p=pickEvening(hotel,date,st,usedEve);
@@ -632,7 +687,7 @@ function buildPlan(){
       items.push({type:"event",start:depT,name:"Flight departs",meta:"Have a filter coffee at the airport. You've earned it."});
     }
     // Calendar notes
-    if(key==="2027-01-14"||key==="2027-01-15")notes.push("Makar Sankranti falls around 14–15 Jan. Karnataka's harvest festival: look for ellu-bella (sesame and jaggery sweets) and festive rangoli at hotels and homes.");
+    if(key==="2027-01-14"||key==="2027-01-15")notes.push("Makar Sankranti falls around 14–15 Jan. Karnataka's harvest festival: look for ellu-bella (sesame and jaggery sweets) and festive rangoli at hotels and homes. At Gavi Gangadhareshwara cave temple, the setting sun lights up the shrine on Sankranti evening, which draws big crowds.");
     if(date.getMonth()===0&&date.getDate()>=16&&date.getDate()<=26)notes.push("The Lalbagh Republic Day flower show usually runs in the 10 days before 26 Jan. Check the dates; it's crowded but spectacular.");
     if(key.endsWith("-01-26"))notes.push("Republic Day is a public holiday. Expect closures and crowds at Lalbagh.");
     if(dow===0&&!isConf)notes.push("Sunday: mornings are quieter on the roads. Vidhana Soudha is often lit up in the evening.");
@@ -644,9 +699,9 @@ function buildPlan(){
 }
 
 /* ---------- Photos (Wikimedia Commons) ---------- */
-const CREDITS = {"lalbagh": ["Kprateek88", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Glass_house_in_Lalbagh,_Bangalore_(rotated).JPG"], "tipu": ["Shrishailctalukar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Tippu_Sultan%27s_Summer_palace.jpg"], "cubbon": ["Yashaswi.jayakumar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Lighting_of_Vidhana_Soudha.jpg"], "map": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Museum_of_Art_and_Photography,_Bangalore_(2025)_109.jpg"], "ngma": ["Rameshng", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:National_Gallery_of_Modern_Art_-_NGMA_-_Bangalore_6645.JPG"], "palace": ["Chuggingtrails", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bangalore_Mysore_Maharaja_Palace.jpg"], "bannerghatta": ["Ashwin06k", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bengal_Tiger_In_Bannerghatta_Bengaluru.jpg"], "nandi": ["JzG", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Sunrise_at_Nandi_Hills.jpg"], "srirangapatna": ["Ms Sarah Welch", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Gopuram_of_the_Ranganathaswamy_Temple,_Srirangapatna_Karnataka_India.jpg"], "mysorepalace": ["Muhammad Mahdi Karim", "GFDL 1.2", "https://commons.wikimedia.org/wiki/File:Mysore_Palace_Morning.jpg"], "venue": ["Rajiv1840478", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Christ_University,_Bangalore,_main_campus.jpg"], "stay_mg": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:MG_Road,_Bangalore_(2025).jpg"], "chamundi": ["Rithwik", "Public domain", "https://commons.wikimedia.org/wiki/File:Chamundeshwari_Temple_Mysore.jpg"], "ubcity": ["No machine-readable author provided. Kailash Naik assumed (based on copyright cl", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:UBtowers.jpg"], "hotel_westend": ["Thejeshgn", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Taj_West_End_Bangalore_(17495).jpg"], "hotel_leela": ["Rajesh_dangi", "CC BY 2.5", "https://commons.wikimedia.org/wiki/File:Airport_road_Bangalore.jpg"], "hotel_oberoi": ["Andrew Plumb from Ottawa, Ontario, Canada", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Lobby_of_The_Oberoi,_Bangalore.jpg"]};
-const CAPTION = {lalbagh:"The Glass House at Lalbagh",cubbon:"Vidhana Soudha at night",tipu:"Tipu Sultan's Summer Palace",palace:"Bangalore Palace",map:"Museum of Art & Photography",ngma:"NGMA garden",ubcity:"UB City at night",bannerghatta:"Tiger at Bannerghatta",nandi:"Sunrise at Nandi Hills",srirangapatna:"Ranganathaswamy temple, Srirangapatna",mysorepalace:"Mysuru Palace",chamundi:"Chamundeshwari temple, Chamundi Hill",venue:"Christ University campus",stay_mg:"MG Road",hotel_westend:"Taj West End",hotel_leela:"Old Airport Road, Bengaluru",hotel_oberoi:"Lobby of The Oberoi"};
-const ALIAS = {skyye:"ubcity",churchst:"stay_mg"};
+const CREDITS = {"lalbagh": ["Kprateek88", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Glass_house_in_Lalbagh,_Bangalore_(rotated).JPG"], "bulltemple": ["Rkrish67 at en.wikipedia", "Public domain", "https://commons.wikimedia.org/wiki/File:Dodda_Ganeshana_Gudi_Hindu_temple,_Basavanagudi,_Karnataka,_India.jpg"], "tipu": ["Shrishailctalukar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Tippu_Sultan%27s_Summer_palace.jpg"], "cubbon": ["Yashaswi.jayakumar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Lighting_of_Vidhana_Soudha.jpg"], "vitm": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Visvesvaraya_Industrial_and_Technological_Museum,_Bangalore_(2025)_02.jpg"], "map": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Museum_of_Art_and_Photography,_Bangalore_(2025)_109.jpg"], "ngma": ["Rameshng", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:National_Gallery_of_Modern_Art_-_NGMA_-_Bangalore_6645.JPG"], "palace": ["Chuggingtrails", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bangalore_Mysore_Maharaja_Palace.jpg"], "iskcon": ["Svpdasa", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:ISKCON_Bangalore_Temple.jpg"], "rangashankara": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Ranga_Shankara,_Bangalore_(2024)_07.jpg"], "bannerghatta": ["Ashwin06k", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bengal_Tiger_In_Bannerghatta_Bengaluru.jpg"], "nandi": ["JzG", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Sunrise_at_Nandi_Hills.jpg"], "srirangapatna": ["Ms Sarah Welch", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Gopuram_of_the_Ranganathaswamy_Temple,_Srirangapatna_Karnataka_India.jpg"], "mysorepalace": ["Muhammad Mahdi Karim", "GFDL 1.2", "https://commons.wikimedia.org/wiki/File:Mysore_Palace_Morning.jpg"], "venue": ["Rajiv1840478", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Christ_University,_Bangalore,_main_campus.jpg"], "stay_mg": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:MG_Road,_Bangalore_(2025).jpg"], "chamundi": ["Rithwik", "Public domain", "https://commons.wikimedia.org/wiki/File:Chamundeshwari_Temple_Mysore.jpg"], "ubcity": ["No machine-readable author provided. Kailash Naik assumed (based on copyright cl", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:UBtowers.jpg"], "hotel_westend": ["Thejeshgn", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Taj_West_End_Bangalore_(17495).jpg"], "hotel_leela": ["Rajesh_dangi", "CC BY 2.5", "https://commons.wikimedia.org/wiki/File:Airport_road_Bangalore.jpg"], "hotel_oberoi": ["Andrew Plumb from Ottawa, Ontario, Canada", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Lobby_of_The_Oberoi,_Bangalore.jpg"], "stmarks": ["India Post", "Public domain", "https://commons.wikimedia.org/wiki/File:St._Marks_Cathedral,_Bangalore._(Old_Postcard_Re-print),_India_Post_(2014).jpg"], "stmarys": ["Photopank", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:St._Mary%27s_Basilica_in_Bangalore.jpg"], "gavi": ["Nvvchar", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:A_trident_outside_Gavigangadareswara_temple_in_Bangalore.jpg"], "hal": ["Rameshng", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:HAL_heritage_centre_and_aerospace_museum_bangalore_7641.JPG"], "sciencegallery": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Science_Gallery_Bengaluru_(2025)_04.jpg"], "planetarium": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Jawaharlal_Nehru_Planetarium,_Bangalore_02.jpg"], "chitrakala": ["Rajesh_dangi (talk) (Uploads)", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Citrakala_Parishat.jpg"], "janapada": ["Nvvchar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Yakshagana_artist%27s_mannequin_on_display_in_the_Janapada_Loka_(Folk_art_museum).jpg"], "adiyogi": ["VasuVR", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:KANBN343-AdiYogi-FrontView-Chikkaballapur-3D.jpg"], "highultra": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:World_Trade_Center,_Bangalore_(2025)_27.jpg"]};
+const CAPTION = {lalbagh:"The Glass House at Lalbagh",cubbon:"Vidhana Soudha at night",tipu:"Tipu Sultan's Summer Palace",palace:"Bangalore Palace",map:"Museum of Art & Photography",ngma:"NGMA garden",ubcity:"UB City at night",bannerghatta:"Tiger at Bannerghatta",nandi:"Sunrise at Nandi Hills",srirangapatna:"Ranganathaswamy temple, Srirangapatna",mysorepalace:"Mysuru Palace",chamundi:"Chamundeshwari temple, Chamundi Hill",venue:"Christ University campus",stay_mg:"MG Road",hotel_westend:"Taj West End",hotel_leela:"Old Airport Road, Bengaluru",hotel_oberoi:"Lobby of The Oberoi",stmarks:"St Mark's Cathedral, on an old postcard",stmarys:"St Mary's Basilica",gavi:"Trident at Gavi Gangadhareshwara temple",hal:"HAL Heritage Centre & Aerospace Museum",sciencegallery:"Science Gallery Bengaluru",planetarium:"Jawaharlal Nehru Planetarium",chitrakala:"Karnataka Chitrakala Parishath",janapada:"Yakshagana figure at Janapada Loka",adiyogi:"Adiyogi, Chikkaballapur",highultra:"World Trade Center, home of High Ultra Lounge",vitm:"Visvesvaraya Museum",iskcon:"ISKCON temple at night",bulltemple:"Dodda Ganesha temple, Basavanagudi",rangashankara:"Ranga Shankara"};
+const ALIAS = {skyye:"ubcity",churchst:"stay_mg",leelabars:"hotel_leela"};
 const STAY_IMG = {luxe:"hotel_oberoi",kora:"venue",westend:"hotel_westend",oldairport:"hotel_leela"};
 const pk = k => ALIAS[k]||k;
 const imgSrc = k => k && CREDITS[pk(k)] ? `img/${pk(k)}.jpg` : null;
@@ -744,14 +799,14 @@ function copyPlan(){
 }
 
 /* ---------- Discover ---------- */
-const FILTERS=[["all","All"],["must","Must-see"],["heritage","Heritage"],["art","Art"],["luxury","Luxury"],["nature","Nature"],["nightlife","Evenings"],["daytrip","Day trips"]];
+const FILTERS=[["all","All"],["must","Must-see"],["heritage","Heritage"],["museums","Museums & science"],["art","Art & folk culture"],["spiritual","Temples & churches"],["nature","Nature"],["luxury","Luxury"],["evening","Evenings"],["daytrip","Day trips"]];
 let placeFilter="all";
 function renderPlaces(){
   const hotel=stayObj(prefs.stay);
-  const list=Object.values(PLACES).filter(p=>placeFilter==="all"||(placeFilter==="must"?p.tier==="must":placeFilter==="daytrip"?p.kind==="daytrip":p.cats.includes(placeFilter)))
+  const list=Object.values(PLACES).filter(p=>placeFilter==="all"||(placeFilter==="must"?p.tier==="must":(placeFilter==="daytrip"||placeFilter==="evening")?p.kind===placeFilter:p.cats.includes(placeFilter)))
     .sort((a,b)=>(a.tier==="must"?0:1)-(b.tier==="must"?0:1));
   $("#places").innerHTML=`<div class="intro"><h2>Discover Bengaluru</h2>
-    <p>Palaces, gardens, galleries and the glossy side of the city. Times are by cab from your hotel area on a weekday at 10:00.</p></div>
+    <p>Palaces, museums, temples, folk art, rooftop lounges and day trips. Use the buttons to filter. Times are by cab from your hotel area on a weekday at 10:00.</p></div>
     <div class="filters">${FILTERS.map(([k,n])=>`<button data-f="${k}" aria-pressed="${k===placeFilter}">${n}</button>`).join("")}</div>
     <div class="gallery">${list.map(p=>{const l=travel(hotel,p,H(10),false),s=imgSrc(p.id);return`
       <button class="pcard" data-place="${p.id}"><div class="ph">${s?`<img src="${s}" alt="${esc(CAPTION[pk(p.id)]||p.name)}" loading="lazy">`:`<span class="blankname">${esc(p.name)}</span>`}
@@ -802,22 +857,38 @@ const DISHES=[
   ["Donne biryani",0,"Bengaluru-style biryani with herbs and short-grain rice, traditionally served in a cup made of areca leaf.","Restaurants serving Karnataka cuisine."],
   ["Mysore pak",1,"A rich sweet of gram flour, sugar and lots of ghee, first made in the Mysuru palace kitchens.","Sweet shops across the city. The classic gift to take home."],
   ["Craft beer",1,"Bengaluru kicked off India's craft-beer boom. Try at least one local brew.","Toit, Byg Brewski or Windmills (see above)."],
-  ["A modern tasting menu",0,"Chefs here are reinterpreting Karnataka ingredients with fine-dining technique.","Farmlore, or Nāvu (see above). Book weeks ahead."]
+  ["A modern tasting menu",0,"Chefs here are reinterpreting regional Indian ingredients with fine-dining technique.","Farmlore or Nila (see above). Book weeks ahead."]
 ];
 // [name, area, what, award]
 const SCENE=[
-  {t:"Fine dining & modern Indian",s:"The most talked-about tables, from Asia's 50 Best Restaurants 2026 and Condé Nast Traveller India's Top 50. Book ahead.",items:[
-    ["Farmlore","outside the city","An 18-seat farm-to-table tasting menu built on seasonal, local produce.","Asia's 50 Best 2026 · No. 83"],
-    ["Nāvu","","One of Bengaluru's most acclaimed new restaurants.","India Top 50 · No. 15"],
-    ["Karavalli","Residency Road","A long-loved restaurant for the coastal cooking of Karnataka and Kerala.",""],
-    ["Kopitiam Lah","","Singaporean and Malaysian comfort food, done properly.","India Top 50 · No. 21"]]},
-  {t:"Cocktail bars",s:"Two of the best bars in Asia are in Bengaluru.",items:[
-    ["Soka","Indiranagar","Inventive cocktails from a chef and bartender pairing.","Asia's 50 Best Bars 2026 · No. 18"],
-    ["Bar Spirit Forward","","Classic-leaning cocktails; try The Old Cuban.","Asia's 50 Best Bars 2026 · No. 30"]]},
-  {t:"Rooftops with a view",s:"Go for sunset, about 18:15 in January, and reserve a table.",items:[
-    ["Skyye","UB City","360-degree views over the city centre. Smart and pricey.",""],
+  {t:"Fine dining & tasting menus",s:"The city's most acclaimed tables. Book well ahead.",items:[
+    ["Farmlore","outside the city","An 18-seat farm-to-table tasting menu built on seasonal, local produce.","Asia's 50 Best 2026 · No. 83 · India No. 4"],
+    ["Nila","Cambridge Road, Ulsoor","Chef Rahul Sharma's 24-seat, 12-course tasting menu. Each season tells a new regional story.","Opened 2026"],
+    ["Nāvu","MG Road","One of Bengaluru's most acclaimed new restaurants.","India Top 50 2026 · No. 15"],
+    ["Lupa","MG Road","A polished restaurant in the city centre.","India Top 50 2026 · No. 42"],
+    ["Karavalli","Residency Road","A long-loved restaurant for the coastal cooking of Karnataka and Kerala.",""]]},
+  {t:"New & buzzing",s:"Where Bengaluru's food crowd is eating right now.",items:[
+    ["Kopitiam Lah","Indiranagar","Singaporean and Malaysian comfort food, done properly.","India Top 50 2026 · No. 21"],
+    ["Naru Noodle Bar","","A tiny, much-loved ramen bar. Seats go fast.","India Top 50 2026 · No. 22"],
+    ["Baan PhadThai","Indiranagar","Bright, punchy Thai street food.","India Top 50 2026 · No. 40"],
+    ["Shoyu","Indiranagar","Northern Thai and Vietnamese cooking.",""],
+    ["Pincode by Kunal Kapur","1MG Lido Mall","Regional Indian dishes from across the country.",""],
+    ["Tomo Kei","Sheraton Grand, Whitefield","A compact Nikkei (Japanese-Peruvian) restaurant.",""],
+    ["Gnome","Embassy Tech Square","A huge garden restaurant and cocktail bar.",""]]},
+  {t:"Cocktail bars",s:"Bengaluru has India's top two bars.",items:[
+    ["Bar Spirit Forward","","Classic-leaning cocktails; try The Old Cuban.","India's Best Bar · Asia's 50 Best 2026 · No. 30"],
+    ["Soka","Indiranagar","Inventive cocktails from a chef and bartender pairing.","India No. 2 · Asia's 50 Best 2026 · No. 18"],
+    ["Copitas","Four Seasons, Bellary Road","On the 21st floor; sundowners until 19:30. Smart casual.","Asia's 50 Best Bars 2023"],
+    ["Dali & Gala","Museum Road","A surrealist bar inspired by Salvador Dalí and Gala.","India No. 9 (2025)"],
+    ["ZLB23 & The Library Bar","The Leela Palace","A speakeasy and a classic library bar in one hotel.","India's 30 Best Bars"],
+    ["The Cloak Society","The Ritz-Carlton","A speakeasy you enter with a metal card. Ask the hotel how to get in.",""],
+    ["403 Forbidden","HAL 2nd Stage","Cocktails served as immersive rituals. A special-occasion splurge.",""]]},
+  {t:"Lounges, rooftops & clubs",s:"Dress smart; some have cover charges or couples-only nights.",items:[
+    ["Skyye","UB City","Rooftop lounge with 360-degree views, a dance floor and a pool.",""],
+    ["High Ultra Lounge","World Trade Center","Often called the highest lounge bar in South India.",""],
+    ["XU","The Leela Palace","A sleek, calm hotel lounge.",""],
+    ["Kitty Ko","The LaLiT Ashok","A glamorous club inside a five-star hotel.",""],
     ["The 13th Floor","MG Road","One of the city's original rooftop bars.",""],
-    ["High Ultra Lounge","World Trade Center","One of the highest rooftop bars in the city.",""],
     ["Loft 38","Indiranagar","Creative cocktails and a good DJ.",""]]},
   {t:"Craft breweries",s:"Bengaluru is often called India's pub capital.",items:[
     ["Toit","Indiranagar","The brewpub that started it all in 2010. Try the Basmati Blonde.",""],
@@ -832,7 +903,7 @@ const SCENE=[
 ];
 function renderEat(){
   $("#eat").innerHTML=`<div class="intro"><h2>Dine &amp; drink</h2>
-    <p>Bengaluru has two of Asia's best bars, a farm-to-table restaurant on Asia's 50 Best list, and a craft-beer scene that started India's. Locals book everything on apps.</p></div>
+    <p>India's two best bars, a farm-to-table restaurant on Asia's 50 Best list, glamorous hotel lounges and the craft-beer scene that started India's. Locals book everything on apps.</p></div>
     <div class="apps">${APPS.map(([n,d,u])=>`<a class="app" href="${u}" target="_blank" rel="noopener"><b>${n} ↗</b><span>${esc(d)}</span></a>`).join("")}</div>
     <p class="hint">These apps may ask for an Indian mobile number to sign in. If yours doesn't work, your hotel concierge can book for you.</p>
     <div class="scene">${SCENE.map(g=>`<div><h3>${esc(g.t)}</h3><p class="sub">${esc(g.s)}</p>
@@ -976,17 +1047,16 @@ function renderAll(){renderPlan();renderPlaces();renderEat();renderStay();render
 /* ---------- Form wiring ---------- */
 function initForm(){
   $("#stay").innerHTML=STAYS.map(s=>`<option value="${s.id}">${esc(s.name)}${s.warn?" (far)":""}</option>`).join("");
-  $("#interests").innerHTML=INTERESTS.map(([k,n])=>`<label class="chip"><input type="checkbox" id="int-${k}" value="${k}">${n}</label>`).join("");
+  prefs.interests=[];
   $("#speaker").value=prefs.speaker;$("#arrDate").value=prefs.arrDate;$("#arrTime").value=prefs.arrTime;
   $("#depDate").value=prefs.depDate;$("#depTime").value=prefs.depTime;$("#flightType").value=prefs.flightType;
   if(!STAYS.some(s=>s.id===prefs.stay))prefs.stay=DEFAULTS.stay;
   $("#stay").value=prefs.stay;$("#pace").value=prefs.pace;
-  INTERESTS.forEach(([k])=>$("#int-"+k).checked=prefs.interests.includes(k));
   $("#dayTrips").checked=prefs.dayTrips;$("#confEvenings").checked=prefs.confEvenings;
   const read=()=>{
     prefs.speaker=$("#speaker").value;prefs.arrDate=$("#arrDate").value||DEFAULTS.arrDate;prefs.arrTime=$("#arrTime").value||DEFAULTS.arrTime;
     prefs.depDate=$("#depDate").value||DEFAULTS.depDate;prefs.depTime=$("#depTime").value||DEFAULTS.depTime;prefs.flightType=$("#flightType").value;
-    prefs.stay=$("#stay").value;prefs.pace=$("#pace").value;prefs.interests=INTERESTS.map(([k])=>k).filter(k=>$("#int-"+k).checked);
+    prefs.stay=$("#stay").value;prefs.pace=$("#pace").value;
     prefs.dayTrips=$("#dayTrips").checked;prefs.confEvenings=$("#confEvenings").checked;
     const bad=parseD(prefs.depDate)<parseD(prefs.arrDate);$("#dateErr").hidden=!bad;$("#dateErr").textContent=bad?"Your leaving date needs to be on or after your arrival date.":"";
     tv.origin=null;save();renderAll();
