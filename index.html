@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="A Bengaluru trip planner for ICDMAI 2027 speakers: day-by-day plans, cab times for every hour of the day, places, dining and where to stay.">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ICDMAI Bengaluru Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a full-bleed night photograph, a floating trip card that overlaps it, then one airy column. Ivory and champagne gold by day, black and gold by night; gold is the only accent, traffic colours are the only other colour. */
+:root{
+  --bg:#FBF8F1; --paper:#FFFFFF; --sunk:#F4EEE1; --ink:#1B1712; --muted:#766C5D; --line:#E7DCC4;
+  --gold:#9C7425; --gold-hi:#D9B65E; --gold-soft:#F7EDD2; --on-gold:#1B1712;
+  --gold-grad:linear-gradient(105deg,#A47A28 0%,#E8CB7E 48%,#A47A28 100%);
+  --t-light:#2F8A5B; --t-mod:#B07A00; --t-heavy:#C0432F; --walk:#4E78A6; --veg:#1F8A4C; --nonveg:#8B3A1A;
+  --display:"Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --body:"Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:16px; --shadow:0 18px 50px rgba(60,40,5,.12);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D0C0A; --paper:#16140F; --sunk:#1D1A13; --ink:#F4ECDC; --muted:#A79C86; --line:#2E291E;
+  --gold:#D9B35F; --gold-hi:#F1D68C; --gold-soft:#2A2314; --on-gold:#17130A;
+  --t-light:#5DC58E; --t-mod:#E3B13F; --t-heavy:#EC7A64; --walk:#88AEDA; --veg:#4CC07A; --nonveg:#E07A52; --shadow:0 18px 50px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D0C0A; --paper:#16140F; --sunk:#1D1A13; --ink:#F4ECDC; --muted:#A79C86; --line:#2E291E;
+  --gold:#D9B35F; --gold-hi:#F1D68C; --gold-soft:#2A2314; --on-gold:#17130A;
+  --t-light:#5DC58E; --t-mod:#E3B13F; --t-heavy:#EC7A64; --walk:#88AEDA; --veg:#4CC07A; --nonveg:#E07A52; --shadow:0 18px 50px rgba(0,0,0,.5); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+a{color:inherit;text-underline-offset:3px;text-decoration-color:var(--line)}
+a:hover{text-decoration-color:var(--gold)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--display);font-weight:500;text-wrap:balance;margin:0;line-height:1.08}
+.label{font-size:11.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;background:#0a0908}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.8}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.5) 0%,rgba(10,9,8,.66) 45%,rgba(10,9,8,.88))}
+.hero .wrap{position:relative;z-index:1;padding-block:clamp(70px,13vw,150px) clamp(90px,12vw,120px);display:grid;gap:14px;justify-items:center;text-align:center;color:#FFF8E8}
+.hero .label{color:#E8CB7E}
+.hero h1{font-size:clamp(40px,8vw,84px);max-width:14ch;text-shadow:0 2px 28px rgba(0,0,0,.6)}
+.hero h1 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.05em}
+.hero p{margin:0;max-width:46ch;color:rgba(255,248,232,.86);font-size:17px}
+.hero .rule{width:96px;height:2px;background:var(--gold-grad);background-size:200% 100%;border-radius:2px}
+.hero .credit{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:8px;z-index:1;font-size:11px;color:rgba(255,248,232,.6)}
+@media (prefers-reduced-motion:no-preference){.hero .rule{animation:sheen 5s ease-in-out infinite}}
+@keyframes sheen{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+
+/* Trip card */
+.tripcard{position:relative;z-index:2;margin-top:-72px;background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px;display:grid;gap:16px}
+.tripcard::before{content:"";position:absolute;left:22px;right:22px;top:-1px;height:2px;background:var(--gold-grad);border-radius:2px}
+.trip-main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+.trip-more{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px 14px;padding-top:12px}
+@media (max-width:640px){.trip-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.trip-main .f:last-child{grid-column:1/-1}.tripcard{padding:18px 16px;margin-top:-56px}}
+.f{display:grid;gap:5px;min-width:0}
+.f label{font-size:11.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=date],input[type=time],select{width:100%;min-width:0;font:inherit;font-size:15.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:14px;cursor:pointer;background:var(--bg);user-select:none}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip:has(input:checked){background:var(--gold-grad);border-color:transparent;color:var(--on-gold);font-weight:500}
+.chip:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px}
+details.more summary{cursor:pointer;font-size:13.5px;color:var(--muted);list-style:none;display:inline-flex;gap:6px;align-items:center}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+";font-size:17px;color:var(--gold);width:14px}
+details.more[open] summary::before{content:"–"}
+.toggles{display:flex;flex-wrap:wrap;gap:8px 22px;grid-column:1/-1}
+.toggle{display:inline-flex;gap:8px;align-items:center;font-size:14.5px;cursor:pointer}
+.toggle input{accent-color:var(--gold);width:16px;height:16px}
+.hint{font-size:13.5px;color:var(--muted);margin:0}
+.err{font-size:14px;color:var(--t-heavy);margin:0}
+
+/* Nav */
+nav.sections{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-top:28px;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.sections .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;justify-content:center}
+@media (max-width:760px){nav.sections .wrap{justify-content:flex-start}}
+nav.sections button{font:inherit;font-size:15px;background:none;border:0;color:var(--muted);padding:15px 15px 13px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav.sections button[aria-selected=true]{color:var(--ink);border-image:var(--gold-grad) 1;border-bottom-width:2px;border-bottom-style:solid}
+.panel{padding-block:40px 64px;display:grid;gap:36px;min-width:0}
+.intro{display:grid;gap:8px;max-width:62ch}
+.intro::after{content:"";width:56px;height:2px;background:var(--gold-grad);border-radius:2px;margin-top:6px}
+.intro h2{font-size:clamp(32px,5vw,46px)}
+.intro p{margin:0;color:var(--muted)}
+.intro.sub h2{font-size:30px}
+
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.facts div{display:grid;gap:2px;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--paper)}
+.facts .v{font-family:var(--display);font-size:38px;font-weight:600;line-height:1;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.facts .k{font-size:13px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:999px;padding:10px 20px;cursor:pointer;border:0;background:var(--gold-grad);color:var(--on-gold);text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--gold)}
+.status{font-size:13.5px;color:var(--muted)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.key i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+
+/* Days */
+.day{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px 36px;padding-top:30px;border-top:1px solid var(--line)}
+@media (max-width:760px){.day{grid-template-columns:minmax(0,1fr)}}
+.dayhead{display:grid;gap:4px;align-content:start}
+@media (min-width:761px){.dayhead{position:sticky;top:70px}}
+.dayhead h3{font-size:34px}
+.dayhead .role{font-size:13.5px;color:var(--muted)}
+.dayhead .role b{color:var(--gold);font-weight:500;letter-spacing:.1em;text-transform:uppercase;font-size:11.5px}
+.dayhead .wx{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.daytitle{font-family:var(--display);font-size:24px;margin:0 0 6px}
+.notes{display:grid;gap:8px;margin-bottom:10px}
+.notes p{margin:0;font-size:14px;color:var(--muted);background:var(--gold-soft);border-radius:12px;padding:9px 14px}
+.tl{display:grid}
+.row{display:grid;grid-template-columns:50px 76px minmax(0,1fr);gap:14px;align-items:start;padding-block:10px}
+@media (max-width:420px){.row,.leg{grid-template-columns:44px 60px minmax(0,1fr);gap:10px}.thumb{width:60px!important;height:60px!important}}
+.row .t{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:3px}
+.thumb{width:76px;height:76px;border-radius:14px;object-fit:cover;background:var(--sunk);display:block}
+.thumb.blank{display:grid;place-items:center;font-family:var(--display);font-size:24px;color:var(--gold);border:1px solid var(--line);background:var(--paper)}
+.row .name{font-weight:500;font-size:17px}
+.row .name a{text-decoration:none}
+.row .meta{font-size:14px;color:var(--muted)}
+.row.soft .name{font-weight:400;font-style:italic;color:var(--muted);font-size:15.5px}
+.row.event .thumb.blank{border-style:dashed;font-size:13px;font-family:var(--body);color:var(--muted)}
+.must{display:inline-block;font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-left:8px;vertical-align:2px}
+.leg{display:grid;grid-template-columns:50px 76px minmax(0,1fr);gap:14px;align-items:center;font-size:13.5px;color:var(--muted)}
+.leg .rail{justify-self:center;width:2px;height:36px;border-radius:2px;background:var(--tc)}
+.leg{--tc:var(--t-light)} .leg.moderate{--tc:var(--t-mod)} .leg.heavy{--tc:var(--t-heavy)} .leg.walk{--tc:var(--walk)}
+.leg .b{display:flex;flex-wrap:wrap;gap:2px 12px}
+.leg .m{font-family:var(--mono);color:var(--tc);font-weight:500}
+
+/* Discover */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 16px;cursor:pointer}
+.filters button[aria-pressed=true]{background:var(--gold-grad);color:var(--on-gold);border-color:transparent;font-weight:500}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:34px 22px}
+@media (max-width:560px){.gallery{grid-template-columns:1fr 1fr;gap:24px 12px}.pcard p{display:none}.pcard h4{font-size:20px}}
+.pcard{display:grid;gap:9px;align-content:start;background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.ph{position:relative;aspect-ratio:4/5;max-width:100%;border-radius:var(--r);overflow:hidden;background:var(--sunk)}
+.ph.wide{aspect-ratio:4/3}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+.pcard:hover .ph img{transform:scale(1.04)}
+.ph::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(217,182,94,.0);transition:box-shadow .3s}
+.pcard:hover .ph::after{box-shadow:inset 0 0 0 2px var(--gold-hi)}
+.ph .badge{position:absolute;left:12px;top:12px;font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--gold-grad);color:#1B1712;border-radius:999px;padding:4px 11px}
+.ph .blankname{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:28px;color:var(--gold);padding:18px;text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:inherit}
+.pcard h4{font-size:24px}
+.pcard p{margin:0;font-size:14.5px;color:var(--muted)}
+.pcard .when{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 12px}
+.pcard .when b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+
+dialog{border:0;padding:0;border-radius:22px;max-width:min(700px,calc(100vw - 24px));width:100%;background:var(--paper);color:var(--ink);box-shadow:0 30px 90px rgba(0,0,0,.5);overflow:auto;max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(8,7,5,.65)}
+dialog .ph{border-radius:0;aspect-ratio:16/10}
+dialog .ph::after{display:none}
+dialog .in{padding:22px 26px 26px;display:grid;gap:14px}
+dialog h3{font-size:36px}
+dialog .close{position:absolute;right:12px;top:12px;z-index:2;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#1B1712;font-size:22px;cursor:pointer}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 22px;font-size:14.5px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.small{font-size:13px;color:var(--muted)}
+
+/* Stays */
+.stays{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:40px 26px}
+.stay{display:grid;gap:12px;align-content:start}
+.stay h4{font-size:28px}
+.stay p{margin:0;font-size:15px}
+.stay .ph{aspect-ratio:16/10}
+.stay.warn .ph{opacity:.7}
+.times{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:14px;border-top:1px solid var(--line);padding-top:12px}
+.times span:nth-child(odd){color:var(--muted)}
+.times span:nth-child(even){font-family:var(--mono);text-align:right}
+.pick{font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);min-height:16px}
+.c-light{color:var(--t-light)} .c-moderate{color:var(--t-mod)} .c-heavy{color:var(--t-heavy)} .c-walk{color:var(--walk)}
+.bg-light{background:var(--t-light)} .bg-moderate{background:var(--t-mod)} .bg-heavy{background:var(--t-heavy)} .bg-walk{background:var(--walk)}
+
+/* Dine */
+.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.app{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;background:var(--paper);display:grid;gap:4px;align-content:start;text-decoration:none}
+.app:hover{border-color:var(--gold)}
+.app b{font-family:var(--display);font-weight:500;font-size:24px}
+.app span{font-size:14px;color:var(--muted)}
+.scene{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:40px 40px}
+.scene h3{font-size:30px;margin-bottom:2px}
+.scene .sub{font-size:14px;color:var(--muted);margin:0 0 8px}
+.vrow{display:grid;gap:2px;padding:12px 0;border-bottom:1px solid var(--line)}
+.vrow:last-child{border-bottom:0}
+.vrow .nm{font-weight:500;font-size:17px}
+.vrow .nm a{text-decoration:none}
+.vrow .ar{font-weight:400;color:var(--muted);font-size:14px}
+.vrow p{margin:0;font-size:14.5px;color:var(--muted)}
+.award{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px 30px}
+.dish{display:grid;gap:5px;align-content:start;padding-top:14px;border-top:1px solid var(--line)}
+.dish h4{font-size:24px}
+.dish p{margin:0;font-size:14.5px}
+.dish .where{font-size:13px;color:var(--muted)}
+.vm{display:inline-block;width:13px;height:13px;border:1.5px solid currentColor;position:relative;vertical-align:1px;margin-right:9px}
+.vm::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:currentColor}
+.vm.veg{color:var(--veg)} .vm.nonveg{color:var(--nonveg)}
+
+/* Travel & tips */
+.controls{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 16px;align-items:end}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:11px 14px 11px 0;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.tdimg{width:40px;height:40px;border-radius:10px;object-fit:cover;vertical-align:middle;margin-right:12px;background:var(--sunk);display:inline-block}
+.guides{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.guide{border:1px solid var(--line);border-radius:var(--r);padding:18px;background:var(--paper);display:grid;gap:7px;align-content:start}
+.guide h4{font-size:26px}
+.guide p{margin:0;font-size:14.5px}
+.guide .contact{font-family:var(--mono);font-size:13px;user-select:all}
+.warnbox{border-radius:var(--r);background:var(--gold-soft);padding:14px 18px;font-size:14.5px}
+.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:30px 30px}
+.tips h4{font-size:24px;margin-bottom:8px}
+.tips ul{margin:0;padding-left:18px;font-size:14.5px;display:grid;gap:5px}
+.phr{display:grid;gap:6px}
+.phr div{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}
+.phr b{font-family:var(--display);font-weight:600;font-size:20px}
+footer{border-top:1px solid var(--line);padding-block:28px 44px;font-size:13px;color:var(--muted);display:grid;gap:12px}
+footer details summary{cursor:pointer;color:var(--ink)}
+footer ul{margin:8px 0 0;padding-left:18px;columns:2 280px;column-gap:28px}
+footer li{break-inside:avoid;margin-bottom:3px}
+@media (prefers-reduced-motion:reduce){.ph img{transition:none}}
+</style>
+
+<header class="hero">
+  <img src="img/cubbon.jpg" alt="Vidhana Soudha, Bengaluru's granite state legislature, lit up at night">
+  <div class="wrap">
+    <span class="label">ICDMAI 2027 · 15–17 January</span>
+    <h1>Bengaluru, <em>beautifully planned</em></h1>
+    <span class="rule" aria-hidden="true"></span>
+    <p>Palaces, gardens, fine dining and rooftop evenings, arranged around your conference days, with an honest cab time for every ride.</p>
+  </div>
+  <span class="credit">Vidhana Soudha · Yashaswi.jayakumar, CC BY-SA 4.0</span>
+</header>
+
+<section class="wrap" aria-label="Your trip">
+  <div class="tripcard">
+    <div class="trip-main">
+      <div class="f"><label for="arrDate">Arriving</label><input type="date" id="arrDate"></div>
+      <div class="f"><label for="depDate">Leaving</label><input type="date" id="depDate"></div>
+      <div class="f"><label for="stay">Staying in</label><select id="stay"></select></div>
+    </div>
+    <div class="chips" id="interests" role="group" aria-label="What you enjoy"></div>
+    <details class="more"><summary>More options</summary>
+      <div class="trip-more">
+        <div class="f"><label for="speaker">Your name</label><input type="text" id="speaker" placeholder="Optional"></div>
+        <div class="f"><label for="arrTime">Landing time</label><input type="time" id="arrTime"></div>
+        <div class="f"><label for="depTime">Flight time</label><input type="time" id="depTime"></div>
+        <div class="f"><label for="flightType">Flights</label><select id="flightType"><option value="intl">International</option><option value="dom">Within India</option></select></div>
+        <div class="f"><label for="pace">Pace</label><select id="pace"><option value="relaxed">Relaxed</option><option value="balanced">Balanced</option><option value="packed">Packed</option></select></div>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="dayTrips">Day trips (Nandi Hills, Mysuru)</label>
+          <label class="toggle"><input type="checkbox" id="confEvenings">Plan evenings after sessions</label>
+        </div>
+      </div>
+    </details>
+    <p class="hint" id="stayHint"></p>
+    <p class="err" id="dateErr" hidden></p>
+  </div>
+</section>
+
+<nav class="sections" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button role="tab" id="tab-plan" aria-controls="plan" aria-selected="true">Your plan</button>
+    <button role="tab" id="tab-places" aria-controls="places" aria-selected="false">Discover</button>
+    <button role="tab" id="tab-eat" aria-controls="eat" aria-selected="false">Dine &amp; drink</button>
+    <button role="tab" id="tab-stay" aria-controls="stay-p" aria-selected="false">Where to stay</button>
+    <button role="tab" id="tab-travel" aria-controls="travel" aria-selected="false">Travel &amp; tips</button>
+  </div>
+</nav>
+<main class="wrap">
+  <section class="panel" id="plan" role="tabpanel" aria-labelledby="tab-plan"></section>
+  <section class="panel" id="places" role="tabpanel" aria-labelledby="tab-places" hidden></section>
+  <section class="panel" id="eat" role="tabpanel" aria-labelledby="tab-eat" hidden></section>
+  <section class="panel" id="stay-p" role="tabpanel" aria-labelledby="tab-stay" hidden></section>
+  <section class="panel" id="travel" role="tabpanel" aria-labelledby="tab-travel" hidden></section>
+</main>
+<dialog id="placeDlg" aria-labelledby="dlgTitle"></dialog>
+<div class="wrap"><footer>
+  <p>Cab times are estimates from distance and typical Bengaluru traffic for each hour. Use the "Live route" links for real-time traffic on the day. Opening hours change, so confirm before you go. Made by a Bengalurean for ICDMAI 2027 speakers.</p>
+  <details><summary>Photo credits</summary><ul id="credits"></ul></details>
+</footer></div>
+
+<script>
+/* ---------- Data ---------- */
+const CONF = { dates:["2027-01-15","2027-01-16","2027-01-17"], start:9*60, end:17*60+30 };
+const VENUE = { id:"venue", name:"Christ University, Central Campus", short:"Venue", lat:12.9343, lng:77.6060, q:"Christ University Central Campus Hosur Road Bengaluru" };
+const AIRPORT = { id:"airport", name:"Kempegowda International Airport (BLR)", short:"Airport", lat:13.1989, lng:77.7068, q:"Kempegowda International Airport Bengaluru" };
+
+const STAYS = [
+  { id:"luxe", name:"UB City, Residency Road & MG Road", lat:12.9710, lng:77.6040, fit:["luxury","food","nightlife","art","heritage"],
+    blurb:"The five-star quarter. Fine dining, designer shopping and the best rooftop bars are all a short walk away. Expect 25–40 minutes to the venue in the morning.",
+    eg:"The Ritz-Carlton, ITC Gardenia, The Oberoi, Taj MG Road" },
+  { id:"kora", name:"Koramangala & Hosur Road", lat:12.9340, lng:77.6180, fit:["close","food","nightlife"],
+    blurb:"Closest to the venue, 5–20 minutes away. Boutique hotels and serviced apartments, with the newest restaurants, breweries and cafés on your doorstep.",
+    eg:"Boutique hotels and serviced apartments; check recent reviews" },
+  { id:"westend", name:"Race Course Road & Palace Road", lat:12.9840, lng:77.5790, fit:["heritage","nature","art"],
+    blurb:"Heritage-hotel living near Cubbon Park, Bangalore Palace and the galleries. Quiet and leafy. Allow 30–45 minutes to the venue.",
+    eg:"Taj West End, set in 20 acres of gardens" },
+  { id:"oldairport", name:"Old Airport Road & Indiranagar", lat:12.9600, lng:77.6480, fit:["luxury","nightlife","food"],
+    blurb:"Luxury hotels close to Indiranagar's bars and restaurants. Fine for evenings, but mornings to the venue can take 35–55 minutes.",
+    eg:"The Leela Palace and other luxury hotels along Old Airport Road" },
+  { id:"whitefield", name:"Whitefield or Electronic City", lat:12.9698, lng:77.7500, fit:[], warn:true,
+    blurb:"Tech-park hotels look close on a map but can take 60–90 minutes each way at peak. Not recommended for this conference.",
+    eg:"Only if your company books it" },
+  { id:"airporth", name:"Near the airport (Devanahalli)", lat:13.1900, lng:77.6900, fit:[], warn:true,
+    blurb:"Only worth it for the last night before a very early flight.",
+    eg:"Hotels along the airport road" }
+];
+
+const INTERESTS = [
+  ["heritage","Palaces & heritage"],["art","Art & design"],["nature","Gardens & nature"],
+  ["luxury","Luxury & shopping"],["food","Fine dining"],["nightlife","Bars & nightlife"]
+];
+
+const H=(h,m=0)=>h*60+m;
+const PLACES = {
+  palace:{name:"Bangalore Palace",area:"Palace Grounds",lat:12.9988,lng:77.5921,tier:"must",cats:["heritage"],dur:75,win:[[H(10),H(17,30)]],
+    why:"A Tudor-style palace modelled on Windsor Castle, built for the Wodeyar kings. Carved wood, painted ceilings and an excellent audio guide.",best:"Morning"},
+  cubbon:{name:"Vidhana Soudha & Cubbon Park",area:"Central",lat:12.9763,lng:77.5929,tier:"must",cats:["heritage","nature"],dur:60,win:[[H(6),H(18)]],
+    why:"The granite seat of Karnataka's government, and the green park beside it. Lit up in gold on special evenings.",best:"7:00–10:00"},
+  lalbagh:{name:"Lalbagh Botanical Garden",area:"Lalbagh",lat:12.9507,lng:77.5848,tier:"must",cats:["nature","heritage"],dur:90,win:[[H(6),H(19)]],
+    why:"A 240-acre garden with a Glass House inspired by London's Crystal Palace and trees older than the city. Go early, when the light is soft.",best:"6:00–10:00"},
+  map:{name:"Museum of Art & Photography",area:"Kasturba Road",lat:12.9741,lng:77.5982,tier:"must",cats:["art"],dur:75,win:[[H(10),H(18,30)]],closed:[1],
+    why:"Bengaluru's leading art museum: South Asian art, photography and textiles in a striking contemporary building, with a good café.",best:"Any time"},
+  ngma:{name:"National Gallery of Modern Art",area:"Palace Road",lat:12.9905,lng:77.5862,tier:"should",cats:["art","heritage"],dur:60,win:[[H(10),H(17)]],closed:[1],
+    why:"Indian modern art in a colonial mansion with a quiet garden.",best:"Afternoon"},
+  tipu:{name:"Tipu Sultan's Summer Palace",area:"Fort area",lat:12.9593,lng:77.5737,tier:"should",cats:["heritage"],dur:40,win:[[H(8,30),H(17,30)]],
+    why:"An 18th-century teak palace with painted arches. Small, quick and full of history.",best:"Morning"},
+  ubcity:{name:"UB City",area:"Vittal Mallya Road",lat:12.9716,lng:77.5963,tier:"must",cats:["luxury","food"],dur:120,win:[[H(11),H(22)]],
+    why:"Bengaluru's luxury quarter: designer boutiques, glass towers and fine-dining restaurants around a central plaza.",best:"Afternoon to evening"},
+  crafts:{name:"Cauvery Arts & Crafts Emporium",area:"MG Road",lat:12.9740,lng:77.6075,tier:"should",cats:["luxury","art"],dur:45,win:[[H(10),H(19)]],
+    why:"A government emporium of Karnataka crafts: sandalwood, rosewood inlay, silk and Channapatna toys. Fixed prices and good gifts.",best:"Late morning"},
+  skyye:{name:"Sunset at Skyye",area:"UB City",lat:12.9716,lng:77.5963,tier:"must",cats:["nightlife","luxury"],dur:120,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"A rooftop bar at the top of UB City with 360-degree views of the skyline. Reserve a table for sunset, about 18:15 in January.",best:"Sunset"},
+  indiranagar:{name:"Indiranagar: Soka, Toit & Loft 38",area:"Indiranagar",lat:12.9719,lng:77.6412,tier:"should",cats:["nightlife","food","luxury"],dur:150,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"Soka is No. 18 on Asia's 50 Best Bars 2026. Around it are the Toit brewpub, Loft 38 and Bengaluru's busiest restaurant strip.",best:"Evening"},
+  churchst:{name:"MG Road rooftops & Church Street",area:"Central",lat:12.9755,lng:77.6050,tier:"should",cats:["nightlife","food"],dur:150,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"The 13th Floor rooftop bar, karaoke at Hard Rock Cafe, and a walkable street of bars and bookshops.",best:"Evening"},
+  koramangala:{name:"Koramangala: breweries & karaoke",area:"Koramangala",lat:12.9345,lng:77.6266,tier:"should",cats:["nightlife","food"],dur:120,win:[[H(17),H(23,30)]],kind:"evening",
+    why:"Ten minutes from the venue: craft breweries, rooftop bars and karaoke at The Boozy Griffin. Book tables on District or Zomato.",best:"Evening"},
+  bannerghatta:{name:"Bannerghatta Biological Park",area:"South, 22 km",lat:12.8003,lng:77.5770,tier:"should",cats:["nature"],dur:210,win:[[H(9,30),H(17)]],closed:[2],
+    why:"Safari through lion and tiger enclosures, plus a butterfly park. A good half-day for families.",best:"Opening time"},
+  nandi:{name:"Nandi Hills sunrise",area:"60 km north",lat:13.3702,lng:77.6835,tier:"must",cats:["nature"],dur:150,win:[[H(6),H(18)]],kind:"daytrip",
+    why:"Watch the sun rise over a sea of clouds from an old hill fort. January mornings are cold and often foggy, so bring a jacket.",best:"Arrive by 6:15"},
+  grover:{name:"Grover Zampa Vineyards",area:"Near Nandi Hills",lat:13.3300,lng:77.6000,tier:"should",cats:["food","luxury"],dur:90,win:[[H(11),H(17)]],kind:"daytrip",
+    why:"Bengaluru's own wine country. One of India's best-known wineries offers vineyard tours and tastings at the foot of Nandi Hills. Book ahead.",best:"Late morning"},
+  srirangapatna:{name:"Srirangapatna",area:"Near Mysuru",lat:12.4220,lng:76.6930,tier:"should",cats:["heritage"],dur:75,win:[[H(8),H(17,30)]],kind:"daytrip",
+    why:"Tipu Sultan's island fortress town: the Daria Daulat palace and the Ranganathaswamy temple.",best:"Morning"},
+  mysorepalace:{name:"Mysuru Palace",area:"Mysuru, 145 km",lat:12.3052,lng:76.6552,tier:"must",cats:["heritage"],dur:100,win:[[H(10),H(17,30)]],kind:"daytrip",
+    why:"One of India's most spectacular palaces. On Sunday evenings it is lit with about 100,000 bulbs (19:00–19:45).",best:"Midday"},
+  chamundi:{name:"Chamundi Hill",area:"Mysuru",lat:12.2724,lng:76.6730,tier:"should",cats:["heritage","nature"],dur:60,win:[[H(7,30),H(21)]],kind:"daytrip",
+    why:"A hilltop temple with a view over Mysuru and a giant Nandi carved from one rock.",best:"Late afternoon"}
+};
+Object.entries(PLACES).forEach(([id,p])=>{p.id=id; p.kind=p.kind||"sight";});
+
+const CLUSTERS = [
+  { id:"heritage", title:"Garden city and royal Bengaluru", evening:true,
+    stops:[{p:"lalbagh",pri:1,at:H(7,30)},{p:"tipu",pri:2},{p:"cubbon",pri:1}],
+    lunch:"Lunch in a hotel restaurant on Residency Road or in UB City (book on District or Zomato)",
+    gap:"Afternoon at leisure. Many five-star hotels have a spa, or try a specialty coffee in Cubbon Park's cafés." },
+  { id:"palaces", title:"Palaces and art", evening:true,
+    stops:[{p:"palace",pri:1,at:H(10)},{p:"ngma",pri:2},{p:"map",pri:1}],
+    lunch:"Lunch at the café at MAP, or a modern restaurant nearby",
+    gap:"Free time before the evening." },
+  { id:"luxury", title:"Craft, design and luxury shopping", evening:true,
+    stops:[{p:"crafts",pri:2,at:H(11)},{p:"ubcity",pri:1}],
+    lunch:"Lunch at a restaurant in UB City or on Lavelle Road (book on District or Zomato)",
+    gap:"Afternoon at your hotel's spa or pool." },
+  { id:"nandi", title:"Nandi Hills sunrise and wine country", daytrip:true, sunrise:true, evening:true,
+    stops:[{p:"nandi",pri:1,at:H(6,15)},{p:"grover",pri:2}],
+    afterNote:"Rest this afternoon. You started before 5." },
+  { id:"mysore", title:"Day trip to Mysuru and Srirangapatna", daytrip:true, long:true,
+    stops:[{p:"srirangapatna",pri:2,at:H(9,30)},{p:"mysorepalace",pri:1},{p:"chamundi",pri:2}],
+    lunch:"Lunch in Mysuru, then a box of Mysore pak to take home",
+    gap:"" },
+  { id:"bannerghatta", title:"Bannerghatta safari and a lazy evening", evening:true,
+    stops:[{p:"bannerghatta",pri:1,at:H(9,30)}],
+    afterNote:"Afternoon rest at the hotel." }
+];
+
+/* Bengaluru climate normals by month: high, low, rainy days, note */
+const CLIMATE = [
+  [27,15,0,"Dry and sunny with cool mornings. The best weather of the year."],
+  [30,17,1,"Dry and warm. Pleasant evenings."],
+  [32,19,1,"Getting hot in the afternoons."],
+  [34,21,3,"Hottest month. Afternoon thunderstorms begin."],
+  [33,21,7,"Hot with evening thunderstorms."],
+  [29,20,7,"Monsoon arrives. Cool, cloudy, light rain."],
+  [28,19,9,"Monsoon. Drizzle most days."],
+  [28,19,10,"Monsoon. Frequent showers."],
+  [28,19,9,"Showers, often heavy in the evening."],
+  [28,19,9,"Wettest stretch. Heavy evening downpours."],
+  [27,17,4,"Cooling down, occasional rain."],
+  [26,15,2,"Cool, mostly dry, misty mornings."]
+];
+const SUN = [["06:43","18:15"],["06:42","18:30"],["06:30","18:33"],["06:10","18:33"],["05:55","18:38"],["05:53","18:48"],["06:00","18:50"],["06:07","18:42"],["06:08","18:20"],["06:10","17:58"],["06:20","17:48"],["06:35","17:55"]];
+
+/* ---------- Travel model ---------- */
+// Typical door-to-door city speeds (km/h) by hour; Bengaluru peaks are roughly 8–11 and 17–21.
+const SPEED_WD=[35,35,35,35,34,30,26,20,13,13,15,18,19,19,18,17,15,12,11,12,14,20,26,32];
+const SPEED_WE=[35,35,35,35,35,32,30,27,24,22,20,18,17,17,18,18,17,15,14,14,16,22,28,32];
+function hav(a,b){const R=6371,r=Math.PI/180,dl=(b.lat-a.lat)*r,dg=(b.lng-a.lng)*r;
+  const x=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+function roadKm(a,b){const d=hav(a,b);return d*(d>60?1.2:d>25?1.25:1.38);}
+const r5=x=>Math.max(5,Math.round(x/5)*5);
+function travel(a,b,depMin,weekend){
+  const km=roadKm(a,b);
+  if(km<1.2){const m=r5(km/4.5*60+2);return{km,mode:"walk",mid:m,lo:m,hi:m+5,level:"walk"};}
+  const hr=((Math.floor(depMin/60))%24+24)%24, s=(weekend?SPEED_WE:SPEED_WD)[hr];
+  const city=Math.min(km,9), hwy=km-city, hs=km>100?58:50;
+  const t=(city/s+hwy/hs)*60+4;
+  return{km,mode:"cab",mid:r5(t),lo:r5(t*.85),hi:r5(t*1.35),level:s>=24?"light":s>=15?"moderate":"heavy"};
+}
+const LVL={light:"Light traffic",moderate:"Moderate traffic",heavy:"Heavy traffic",walk:"Walk"};
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=m=>{m=Math.round(m);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");};
+const parseT=s=>{const[h,m]=(s||"0:0").split(":").map(Number);return h*60+(m||0);};
+const parseD=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], DOWL=["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const nice=d=>`${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+const mins=m=>m>=60?`${Math.floor(m/60)} h ${m%60?m%60+" min":""}`.trim():`${m} min`;
+const range=l=>l.mode==="walk"?`${l.mid} min walk`:`${l.lo}–${l.hi} min`;
+const mapQ=p=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q||p.name+", Bengaluru")}`;
+const dirQ=(a,b)=>`https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lng}&destination=${b.lat},${b.lng}&travelmode=${hav(a,b)<1?"walking":"driving"}`;
+const matches=(p,ints)=>p.cats.filter(c=>ints.includes(c)).length;
+const openAt=(p,arrive)=>{for(const[o,c]of p.win){const st=Math.max(arrive,o);if(st+Math.min(p.dur,45)<=c)return st;}return null;};
+const closedOn=(p,dow)=>(p.closed||[]).includes(dow);
+
+/* ---------- Prefs ---------- */
+const DEFAULTS={speaker:"",arrDate:"2027-01-14",arrTime:"10:30",depDate:"2027-01-19",depTime:"21:30",flightType:"intl",stay:"luxe",
+  interests:["heritage","luxury","food"],pace:"balanced",dayTrips:true,confEvenings:true};
+let prefs=Object.assign({},DEFAULTS);
+try{const s=JSON.parse(localStorage.getItem("icdmai-planner")||"null");if(s)prefs=Object.assign(prefs,s);}catch(e){}
+function save(){try{localStorage.setItem("icdmai-planner",JSON.stringify(prefs));}catch(e){}}
+
+function stayObj(id){const s=STAYS.find(x=>x.id===id)||STAYS[1];return{...s,short:"Hotel",name:`Your hotel (${s.name})`};}
+
+/* ---------- Scheduler ---------- */
+function paceFilter(stops,pace){const maxPri=pace==="relaxed"?1:pace==="balanced"?2:3;return stops.filter(s=>s.pri<=maxPri);}
+
+function runStops(defs,origin,date,startMin,opt={}){
+  const items=[],notes=[],dow=date.getDay(),we=dow===0||dow===6;
+  let cur=origin,t=startMin,lunchDone=!!opt.lunchDone;
+  for(const sd of defs){
+    const p=PLACES[sd.p];
+    if(closedOn(p,dow)){notes.push(`${p.name} is closed on ${DOWL[dow]}, so it's left out today.`);continue;}
+    if(opt.lunch&&!lunchDone&&t>=H(12,30)&&items.length){items.push({type:"meal",start:t,end:t+60,text:opt.lunch});t+=60;lunchDone=true;}
+    let leg=travel(cur,p,t,we);
+    if(sd.at!=null&&t+leg.mid<sd.at){
+      const dep=sd.at-travel(cur,p,sd.at-40,we).mid;
+      if(items.length&&dep-t>=45){
+        if(opt.lunch&&!lunchDone&&t<H(14)){items.push({type:"meal",start:Math.max(t,H(12,30)),end:Math.max(t,H(12,30))+60,text:opt.lunch});lunchDone=true;}
+        if(opt.gap)items.push({type:"gap",start:t,end:dep,text:opt.gap});
+      }
+      t=dep;leg=travel(cur,p,t,we);
+    }
+    const arrive=t+leg.mid, st=openAt(p,arrive);
+    if(st==null){notes.push(`${p.name} would be closed by the time you get there, so it's left out.`);continue;}
+    const leave=st+p.dur;
+    if(opt.endBy&&leave+travel(p,origin,leave,we).mid>opt.endBy)break;
+    items.push({type:"leg",from:cur,to:p,dep:t,...leg});
+    items.push({type:"stop",p,start:st,end:leave,wait:st-arrive>=10?st:null});
+    cur=p;t=leave;
+  }
+  return{items,notes,t,cur};
+}
+
+function fillWindow(origin,date,start,end,used,maxStops){
+  const items=[],dow=date.getDay(),we=dow===0||dow===6;let cur=origin,t=start;
+  for(let n=0;n<maxStops;n++){
+    let best=null,bs=-1e9;
+    for(const p of Object.values(PLACES)){
+      if(p.kind!=="sight"||used.has(p.id)||closedOn(p,dow)||hav(VENUE,p)>15)continue;
+      const leg=travel(cur,p,t,we),arrive=t+leg.mid,st=openAt(p,arrive);
+      if(st==null||st-arrive>60)continue;
+      if(st+p.dur+travel(p,origin,st+p.dur,we).mid>end)continue;
+      const sc=(p.tier==="must"?4:0)+2*matches(p,prefs.interests)-leg.mid/8-(st-arrive)/15;
+      if(sc>bs){bs=sc;best={p,leg,st};}
+    }
+    if(!best)break;
+    used.add(best.p.id);
+    items.push({type:"leg",from:cur,to:best.p,dep:t,...best.leg});
+    items.push({type:"stop",p:best.p,start:best.st,end:best.st+best.p.dur,wait:best.st-(t+best.leg.mid)>=10?best.st:null});
+    cur=best.p;t=best.st+best.p.dur;
+  }
+  return{items,t,cur};
+}
+
+function pickEvening(from,date,t,usedEve){
+  const dow=date.getDay(),we=dow===0||dow===6;
+  let best=null,bs=-1e9;
+  for(const p of Object.values(PLACES)){
+    if(p.kind!=="evening"||closedOn(p,dow))continue;
+    const leg=travel(from,p,t,we);
+    const sc=2*matches(p,prefs.interests)+(usedEve.has(p.id)?-4:2)-leg.mid/10+(p.tier==="must"?1:0);
+    if(sc>bs){bs=sc;best=p;}
+  }
+  if(best)usedEve.add(best.id);
+  return best;
+}
+
+function legItem(a,b,t,date){const dow=date.getDay();return{type:"leg",from:a,to:b,dep:t,...travel(a,b,t,dow===0||dow===6)};}
+
+function buildPlan(){
+  const hotel=stayObj(prefs.stay), intl=prefs.flightType==="intl";
+  const a=parseD(prefs.arrDate), d=parseD(prefs.depDate);
+  const dates=[];for(let x=new Date(a);x<=d&&dates.length<21;x.setDate(x.getDate()+1))dates.push(new Date(x));
+  const arrT=parseT(prefs.arrTime), depT=parseT(prefs.depTime);
+  const maxStops=prefs.pace==="relaxed"?2:prefs.pace==="balanced"?3:5;
+
+  // Which days are fully free?
+  const freeFull=dates.filter((x,i)=>i>0&&i<dates.length-1&&!CONF.dates.includes(iso(x)));
+  const nFree=freeFull.length, ints=prefs.interests;
+  const eligible=CLUSTERS.filter(c=>{
+    if(c.id==="mysore")return prefs.dayTrips&&(nFree>=3||(nFree>=2&&ints.includes("heritage")));
+    if(c.id==="nandi")return prefs.dayTrips&&(ints.includes("nature")||nFree>=2);
+    if(c.id==="bannerghatta")return ints.includes("nature")&&nFree>=4;
+    return true;
+  }).map(c=>({c,score:c.stops.reduce((s,x)=>{const p=PLACES[x.p];return s+(p.tier==="must"?4:1)+2*matches(p,ints);},0)}))
+    .sort((x,y)=>y.score-x.score).map(x=>x.c);
+  const assign={},remaining=[...eligible];
+  for(const day of freeFull){
+    if(!remaining.length)break;
+    const dow=day.getDay();
+    let idx=remaining.findIndex(c=>!c.stops.some(s=>s.pri===1&&closedOn(PLACES[s.p],dow)));
+    if(idx<0)idx=0;
+    assign[iso(day)]=remaining.splice(idx,1)[0];
+  }
+  const used=new Set();
+  Object.values(assign).forEach(c=>paceFilter(c.stops,prefs.pace).forEach(s=>used.add(s.p)));
+  const usedEve=new Set();
+
+  const days=dates.map((date,i)=>{
+    const key=iso(date), dow=date.getDay(), we=dow===0||dow===6;
+    const isArr=i===0, isDep=i===dates.length-1, isConf=CONF.dates.includes(key);
+    const items=[],notes=[];let start=H(8),end=H(22),cur=hotel;
+
+    if(isArr){
+      items.push({type:"event",start:arrT,name:"Land at Kempegowda International Airport",meta:intl?"Allow about 60–90 min for immigration, bags and the taxi queue.":"Allow about 30 min for bags."});
+      const out=arrT+(intl?75:35), leg=legItem(AIRPORT,hotel,out,date);
+      items.push(leg);
+      const eta=out+leg.mid;
+      items.push({type:"event",start:eta,name:"Check in and rest",meta:"Use the prepaid taxi counter or the official app-cab pickup zone at arrivals."});
+      start=eta+(intl?150:60);
+      if(arrT<H(6)){start=Math.max(start,H(11,30));notes.push("Overnight arrival: ask your hotel for early check-in so you can sleep before heading out.");}
+    }
+    let leaveBy=null;
+    if(isDep){
+      const pre=intl?180:120, est=travel(hotel,AIRPORT,depT-pre-90,we);
+      leaveBy=depT-pre-est.hi-15;
+      end=leaveBy-30;
+      if(leaveBy<H(6))notes.push("Very early flight. Consider a hotel near the airport for the last night.");
+    }
+
+    if(isConf){
+      if(start<=CONF.start){
+        const dep=H(8,45)-travel(hotel,VENUE,H(8),we).mid;
+        items.push(legItem(hotel,VENUE,dep,date));
+      }else if(start<CONF.end){
+        items.push(legItem(hotel,VENUE,start,date));
+      }
+      let confEnd=CONF.end;
+      if(isDep){const back=travel(VENUE,hotel,leaveBy-60,we).mid;confEnd=Math.min(CONF.end,leaveBy-back-20);}
+      const confStart=Math.max(CONF.start,start<=CONF.start?CONF.start:start+travel(hotel,VENUE,start,we).mid);
+      if(confEnd>confStart){
+        items.push({type:"event",start:confStart,end:confEnd,name:`ICDMAI 2027 — day ${CONF.dates.indexOf(key)+1}`,meta:"Christ University, Central Campus, Hosur Road",conf:true});
+        cur=VENUE;
+      }
+      const eveOK=prefs.confEvenings&&!isDep&&(prefs.pace!=="relaxed"||key===CONF.dates[CONF.dates.length-1]);
+      if(cur===VENUE&&eveOK&&end-confEnd>=180){
+        const p=pickEvening(VENUE,date,confEnd+15,usedEve);
+        if(p){const r=runStops([{p:p.id,pri:1}],VENUE,date,confEnd+15,{});items.push(...r.items);cur=r.cur;notes.push(...r.notes);
+          if(r.cur!==VENUE)items.push(legItem(r.cur,hotel,r.t,date),{type:"event",start:r.t+travel(r.cur,hotel,r.t,we).mid,name:"Back at the hotel"});}
+      }else if(cur===VENUE){
+        items.push(legItem(VENUE,hotel,confEnd+10,date));
+        if(!isDep)items.push({type:"event",start:confEnd+10+travel(VENUE,hotel,confEnd+10,we).mid,name:"Dinner near your hotel"});
+      }
+      if(isArr&&start>=CONF.end)notes.push("You land after today's sessions end. Rest up for tomorrow.");
+    }else{
+      const c=assign[key];
+      if(c){
+        const defs=paceFilter(c.stops,prefs.pace);
+        const r=runStops(defs,hotel,date,H(7),{lunch:c.lunch,gap:c.gap,endBy:c.long?H(22,30):H(22)});
+        items.push(...r.items);notes.push(...r.notes);
+        if(c.id==="mysore"&&dow===0)notes.push("It's Sunday: stay for the palace illumination, 19:00–19:45, and you'll be back in Bengaluru close to midnight.");
+        let t=r.t;
+        if(r.cur!==hotel){const back=legItem(r.cur,hotel,t,date);items.push(back);t+=back.mid;items.push({type:"event",start:t,name:"Back at the hotel",meta:c.afterNote||""});}
+        if(c.evening&&prefs.pace!=="relaxed"){
+          const st=Math.max(t+60,H(18,30)),p=pickEvening(hotel,date,st,usedEve);
+          if(p){const e=runStops([{p:p.id,pri:1}],hotel,date,st,{});items.push(...e.items);
+            if(e.cur!==hotel)items.push(legItem(e.cur,hotel,e.t,date));}
+        }
+        if(c.sunrise)notes.unshift("January dawn at Nandi Hills is around 10–14 °C and often foggy. Wear layers. Your cab needs to leave at about 4:30.");
+        items.unshift({type:"title",text:c.title});
+      }else{
+        const s=Math.max(start,H(9,15));
+        if(end-s>=120){
+          const f=fillWindow(hotel,date,s,Math.min(end,H(18)),used,isArr||isDep?Math.min(2,maxStops):maxStops);
+          items.push(...f.items);
+          if(f.cur!==hotel){const back=legItem(f.cur,hotel,f.t,date);items.push(back,{type:"event",start:f.t+back.mid,name:"Back at the hotel"});}
+          if(f.items.length===0&&isArr)items.push({type:"event",start:s,name:"Free afternoon",meta:"A slow walk around your neighbourhood is the best cure for jet lag."});
+        }
+        if(!isDep&&end>=H(21)&&(prefs.pace!=="relaxed"||!isArr)){
+          const st=Math.max(start,H(18,30)),p=pickEvening(hotel,date,st,usedEve);
+          if(p){const e=runStops([{p:p.id,pri:1}],hotel,date,st,{});items.push(...e.items);
+            if(e.cur!==hotel)items.push(legItem(e.cur,hotel,e.t,date));}
+        }
+      }
+    }
+    if(isDep){
+      if(leaveBy>=H(5))items.push(legItem(hotel,AIRPORT,leaveBy,date));
+      const pre=intl?3:2;
+      items.splice(items.findIndex(x=>x.type==="leg"&&x.to===AIRPORT),0,{type:"event",start:leaveBy,name:"Leave for the airport",meta:`Allows for traffic and ${pre} hours at the airport. Book your cab the night before.`});
+      items.push({type:"event",start:depT,name:"Flight departs",meta:"Have a filter coffee at the airport. You've earned it."});
+    }
+    // Calendar notes
+    if(key==="2027-01-14"||key==="2027-01-15")notes.push("Makar Sankranti falls around 14–15 Jan. Karnataka's harvest festival: look for ellu-bella (sesame and jaggery sweets) and festive rangoli at hotels and homes.");
+    if(date.getMonth()===0&&date.getDate()>=16&&date.getDate()<=26)notes.push("The Lalbagh Republic Day flower show usually runs in the 10 days before 26 Jan. Check the dates; it's crowded but spectacular.");
+    if(key.endsWith("-01-26"))notes.push("Republic Day is a public holiday. Expect closures and crowds at Lalbagh.");
+    if(dow===0&&!isConf)notes.push("Sunday: mornings are quieter on the roads. Vidhana Soudha is often lit up in the evening.");
+    if(dow===0&&isConf)notes.push("Sunday: lighter traffic, so the commute should be quicker than on weekdays.");
+    const role=[isArr&&"Arrival",isConf&&"Conference",isDep&&"Departure",!isArr&&!isConf&&!isDep&&"Explore"].filter(Boolean);
+    return{date,key,items,notes,role,isConf};
+  });
+  return{days,hotel};
+}
+
+/* ---------- Photos (Wikimedia Commons) ---------- */
+const CREDITS = {"lalbagh": ["Kprateek88", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Glass_house_in_Lalbagh,_Bangalore_(rotated).JPG"], "tipu": ["Shrishailctalukar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Tippu_Sultan%27s_Summer_palace.jpg"], "cubbon": ["Yashaswi.jayakumar", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Lighting_of_Vidhana_Soudha.jpg"], "map": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Museum_of_Art_and_Photography,_Bangalore_(2025)_109.jpg"], "ngma": ["Rameshng", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:National_Gallery_of_Modern_Art_-_NGMA_-_Bangalore_6645.JPG"], "palace": ["Chuggingtrails", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bangalore_Mysore_Maharaja_Palace.jpg"], "bannerghatta": ["Ashwin06k", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Bengal_Tiger_In_Bannerghatta_Bengaluru.jpg"], "nandi": ["JzG", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Sunrise_at_Nandi_Hills.jpg"], "srirangapatna": ["Ms Sarah Welch", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Gopuram_of_the_Ranganathaswamy_Temple,_Srirangapatna_Karnataka_India.jpg"], "mysorepalace": ["Muhammad Mahdi Karim", "GFDL 1.2", "https://commons.wikimedia.org/wiki/File:Mysore_Palace_Morning.jpg"], "venue": ["Rajiv1840478", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Christ_University,_Bangalore,_main_campus.jpg"], "stay_mg": ["Gpkp", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:MG_Road,_Bangalore_(2025).jpg"], "chamundi": ["Rithwik", "Public domain", "https://commons.wikimedia.org/wiki/File:Chamundeshwari_Temple_Mysore.jpg"], "ubcity": ["No machine-readable author provided. Kailash Naik assumed (based on copyright cl", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:UBtowers.jpg"], "hotel_westend": ["Thejeshgn", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Taj_West_End_Bangalore_(17495).jpg"], "hotel_leela": ["Rajesh_dangi", "CC BY 2.5", "https://commons.wikimedia.org/wiki/File:Airport_road_Bangalore.jpg"], "hotel_oberoi": ["Andrew Plumb from Ottawa, Ontario, Canada", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Lobby_of_The_Oberoi,_Bangalore.jpg"]};
+const CAPTION = {lalbagh:"The Glass House at Lalbagh",cubbon:"Vidhana Soudha at night",tipu:"Tipu Sultan's Summer Palace",palace:"Bangalore Palace",map:"Museum of Art & Photography",ngma:"NGMA garden",ubcity:"UB City at night",bannerghatta:"Tiger at Bannerghatta",nandi:"Sunrise at Nandi Hills",srirangapatna:"Ranganathaswamy temple, Srirangapatna",mysorepalace:"Mysuru Palace",chamundi:"Chamundeshwari temple, Chamundi Hill",venue:"Christ University campus",stay_mg:"MG Road",hotel_westend:"Taj West End",hotel_leela:"Old Airport Road, Bengaluru",hotel_oberoi:"Lobby of The Oberoi"};
+const ALIAS = {skyye:"ubcity",churchst:"stay_mg"};
+const STAY_IMG = {luxe:"hotel_oberoi",kora:"venue",westend:"hotel_westend",oldairport:"hotel_leela"};
+const pk = k => ALIAS[k]||k;
+const imgSrc = k => k && CREDITS[pk(k)] ? `img/${pk(k)}.jpg` : null;
+const credit = k => CREDITS[k] ? `${CREDITS[k][0]}, ${CREDITS[k][1]}` : "";
+function thumb(k, alt, fallback){
+  const s = imgSrc(k);
+  return s ? `<img class="thumb" src="${s}" alt="${esc(alt)}" loading="lazy">` : `<span class="thumb blank" aria-hidden="true">${esc(fallback||"")}</span>`;
+}
+
+/* ---------- Plan ---------- */
+function renderItem(it){
+  if(it.type==="title")return `<div class="daytitle">${esc(it.text)}</div>`;
+  if(it.type==="leg"){
+    return `<div class="leg ${it.level}"><span></span><span class="rail" aria-hidden="true"></span><div class="b">
+      <span class="m">${it.mode==="walk"?"Walk":"Cab"} ${range(it)}</span><span>${it.km.toFixed(1)} km · ${LVL[it.level].toLowerCase()} · leave ${fmt(it.dep)}</span>
+      <a href="${dirQ(it.from,it.to)}" target="_blank" rel="noopener">Live route ↗</a></div></div>`;
+  }
+  if(it.type==="stop"){
+    const p=it.p;
+    return `<div class="row"><span class="t">${fmt(it.start)}</span>${thumb(p.id,CAPTION[pk(p.id)]||p.name,p.name[0])}
+      <div><div class="name"><a href="#" data-place="${p.id}">${esc(p.name)}</a>${p.tier==="must"?'<span class="must">Must-see</span>':""}</div>
+      <div class="meta">${mins(p.dur)} · until ${fmt(it.end)}${it.wait?` · opens ${fmt(it.wait)}`:""}</div>
+      <div class="meta">${esc(p.why)}</div></div></div>`;
+  }
+  if(it.type==="meal"||it.type==="gap")
+    return `<div class="row soft"><span class="t">${fmt(it.start)}</span><span class="thumb blank" aria-hidden="true" style="font-size:13px;font-family:var(--body);color:var(--muted)">${it.type==="meal"?"Lunch":"Free"}</span><div class="name">${esc(it.text)}</div></div>`;
+  if(it.type==="event"){
+    let k=null,fb="";
+    if(it.conf)k="venue";
+    else if(/airport|flight/i.test(it.name))fb="BLR";
+    else if(/hotel|check in/i.test(it.name))k=STAY_IMG[prefs.stay],fb="Hotel";
+    return `<div class="row event"><span class="t">${fmt(it.start)}</span>${thumb(k,it.name,fb)}
+      <div><div class="name">${esc(it.name)}${it.end?` <span class="meta" style="font-weight:400">until ${fmt(it.end)}</span>`:""}</div>${it.meta?`<div class="meta">${esc(it.meta)}</div>`:""}</div></div>`;
+  }
+  return "";
+}
+
+let lastPlan=null;
+function renderPlan(){
+  const el=$("#plan");
+  if(parseD(prefs.depDate)<parseD(prefs.arrDate)){el.innerHTML=`<p class="err">Your leaving date is before your arrival date. Fix the dates above to see a plan.</p>`;return;}
+  const plan=buildPlan();lastPlan=plan;
+  const all=plan.days.flatMap(d=>d.items);
+  const mustIds=Object.values(PLACES).filter(p=>p.tier==="must").map(p=>p.id);
+  const seen=new Set(all.filter(x=>x.type==="stop").map(x=>x.p.id));
+  const cab=all.filter(x=>x.type==="leg"&&x.mode==="cab").reduce((s,x)=>s+x.mid,0);
+  const name=prefs.speaker.trim();
+  el.innerHTML=`
+    <div class="intro"><h2>${name?esc(name)+", here's your plan":"Your plan"}</h2>
+      <p>Staying in ${esc(STAYS.find(s=>s.id===prefs.stay).name)}. Tap any place for photos and details.</p></div>
+    <div class="facts">
+      <div><span class="v">${plan.days.length}</span><span class="k">days in Bengaluru</span></div>
+      <div><span class="v">${plan.days.filter(d=>!d.isConf).length}</span><span class="k">days outside sessions</span></div>
+      <div><span class="v">${mustIds.filter(i=>seen.has(i)).length}/${mustIds.length}</span><span class="k">must-sees covered</span></div>
+      <div><span class="v">${(cab/60).toFixed(1)} h</span><span class="k">in cabs, in total</span></div>
+    </div>
+    <div class="actions"><button class="btn" id="copyBtn">Copy plan as text</button>
+      <span class="key"><span><i class="bg-light"></i>light traffic</span><span><i class="bg-moderate"></i>moderate</span><span><i class="bg-heavy"></i>heavy</span><span><i class="bg-walk"></i>walk</span></span>
+      <span class="status" id="copyStatus" role="status"></span></div>
+    <textarea id="copyFallback" readonly hidden style="width:100%;height:160px;font:12px var(--mono)"></textarea>
+    ${plan.days.map(day=>{
+      const [hi,lo,rd]=CLIMATE[day.date.getMonth()];
+      return `<article class="day">
+        <div class="dayhead"><h3>${nice(day.date)}</h3>
+          <span class="role">${day.isConf?"<b>ICDMAI</b> · ":""}${day.role.filter(r=>r!=="Conference").join(" · ")||"Conference"}</span>
+          <span class="wx">${hi}° / ${lo}°C · ${rd<=1?"dry":rd<=4?"chance of a shower":"rain likely"}</span></div>
+        <div style="min-width:0">${day.notes.length?`<div class="notes">${day.notes.map(n=>`<p>${esc(n)}</p>`).join("")}</div>`:""}
+          <div class="tl">${day.items.map(renderItem).join("")||'<p class="hint">Rest day.</p>'}</div></div>
+      </article>`;}).join("")}`;
+  $("#copyBtn").onclick=copyPlan;
+}
+
+function planText(){
+  const p=lastPlan;if(!p)return"";
+  const L=[`ICDMAI 2027 · Bengaluru plan${prefs.speaker.trim()?" for "+prefs.speaker.trim():""}`,`Venue: Christ University, Central Campus, Hosur Road · 15–17 Jan 2027`,`Stay: ${STAYS.find(s=>s.id===prefs.stay).name}`,""];
+  for(const d of p.days){
+    L.push(`${nice(d.date)} — ${d.role.join(" / ")}`);
+    for(const it of d.items){
+      if(it.type==="title")L.push(`  ${it.text}`);
+      else if(it.type==="leg")L.push(`        → ${it.mode==="walk"?"walk":"cab"} ${range(it)} (${it.km.toFixed(1)} km, ${LVL[it.level].toLowerCase()})`);
+      else if(it.type==="stop")L.push(`  ${fmt(it.start)}  ${it.p.name}${it.p.tier==="must"?" ★":""}`);
+      else if(it.type==="event")L.push(`  ${fmt(it.start)}  ${it.name}`);
+      else L.push(`  ${fmt(it.start)}  ${it.text}`);
+    }
+    d.notes.forEach(n=>L.push(`  Note: ${n}`));
+    L.push("");
+  }
+  L.push("Cab times are estimates. Check live traffic in Google Maps before leaving.");
+  return L.join("\n");
+}
+function copyPlan(){
+  const txt=planText(),st=$("#copyStatus");
+  const fallback=()=>{const ta=$("#copyFallback");ta.hidden=false;ta.value=txt;ta.focus();ta.select();st.textContent="Copying is blocked here. The plan is selected below; press Ctrl+C or ⌘C.";};
+  try{navigator.clipboard.writeText(txt).then(()=>{st.textContent="Copied. Paste it into an email or WhatsApp.";},fallback);}catch(e){fallback();}
+}
+
+/* ---------- Discover ---------- */
+const FILTERS=[["all","All"],["must","Must-see"],["heritage","Heritage"],["art","Art"],["luxury","Luxury"],["nature","Nature"],["nightlife","Evenings"],["daytrip","Day trips"]];
+let placeFilter="all";
+function renderPlaces(){
+  const hotel=stayObj(prefs.stay);
+  const list=Object.values(PLACES).filter(p=>placeFilter==="all"||(placeFilter==="must"?p.tier==="must":placeFilter==="daytrip"?p.kind==="daytrip":p.cats.includes(placeFilter)))
+    .sort((a,b)=>(a.tier==="must"?0:1)-(b.tier==="must"?0:1));
+  $("#places").innerHTML=`<div class="intro"><h2>Discover Bengaluru</h2>
+    <p>Palaces, gardens, galleries and the glossy side of the city. Times are by cab from your hotel area on a weekday at 10:00.</p></div>
+    <div class="filters">${FILTERS.map(([k,n])=>`<button data-f="${k}" aria-pressed="${k===placeFilter}">${n}</button>`).join("")}</div>
+    <div class="gallery">${list.map(p=>{const l=travel(hotel,p,H(10),false),s=imgSrc(p.id);return`
+      <button class="pcard" data-place="${p.id}"><div class="ph">${s?`<img src="${s}" alt="${esc(CAPTION[pk(p.id)]||p.name)}" loading="lazy">`:`<span class="blankname">${esc(p.name)}</span>`}
+        ${p.tier==="must"?'<span class="badge">Must-see</span>':""}</div>
+        <h4>${esc(p.name)}</h4><p>${esc(p.why)}</p>
+        <span class="when"><span>Best <b>${esc(p.best)}</b></span><span class="c-${l.level}">From hotel <b class="c-${l.level}">${range(l)}</b></span></span></button>`;}).join("")}</div>`;
+  document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{placeFilter=b.dataset.f;renderPlaces();});
+}
+function openPlace(id){
+  const p=PLACES[id];if(!p)return;
+  const hotel=stayObj(prefs.stay),am=travel(hotel,p,H(10),false),pm=travel(hotel,p,H(18),false),fromV=travel(VENUE,p,H(17,45),false),s=imgSrc(id),dk=pk(id);
+  const dlg=$("#placeDlg");
+  dlg.innerHTML=`<button class="close" aria-label="Close">×</button>
+    <div class="ph">${s?`<img src="${s}" alt="${esc(CAPTION[dk]||p.name)}">`:`<span class="blankname">${esc(p.name)}</span>`}</div>
+    <div class="in"><span class="label">${esc(p.area)}${p.tier==="must"?" · Must-see":""}</span><h3 id="dlgTitle">${esc(p.name)}</h3><p style="margin:0">${esc(p.why)}</p>
+    <dl class="kv"><dt>Spend</dt><dd>${mins(p.dur)}</dd><dt>Best time</dt><dd>${esc(p.best)}</dd>
+      <dt>Hours</dt><dd class="mono">${p.win.map(w=>fmt(w[0])+"–"+fmt(w[1])).join(", ")}</dd>
+      ${p.closed?`<dt>Closed</dt><dd>${p.closed.map(x=>DOWL[x]).join(", ")}</dd>`:""}
+      <dt>From hotel, 10:00</dt><dd class="mono c-${am.level}">${range(am)}</dd>
+      <dt>From hotel, 18:00</dt><dd class="mono c-${pm.level}">${range(pm)}</dd>
+      <dt>From venue, 17:45</dt><dd class="mono c-${fromV.level}">${range(fromV)}</dd></dl>
+    <div class="actions"><a class="btn" href="${mapQ(p)}" target="_blank" rel="noopener">Open in Maps ↗</a>
+      <a class="btn ghost" href="${dirQ(hotel,p)}" target="_blank" rel="noopener">Live route from hotel ↗</a></div>
+    ${CREDITS[dk]?`<span class="small">Photo: <a href="${CREDITS[dk][2]}" target="_blank" rel="noopener">${esc(credit(dk))}</a>, via Wikimedia Commons</span>`:""}</div>`;
+  dlg.querySelector(".close").onclick=()=>dlg.close();
+  try{dlg.showModal();}catch(e){dlg.setAttribute("open","");}
+}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-place]");
+  if(t){e.preventDefault();openPlace(t.dataset.place);}
+});
+$("#placeDlg").addEventListener("click",e=>{if(e.target.id==="placeDlg")e.target.close();});
+
+/* ---------- Dine & drink ---------- */
+const gmap=(n,area)=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(n+(area?", "+area:"")+", Bengaluru")}`;
+const APPS=[
+  ["District","by Zomato. Book tables, and find gigs, karaoke nights and comedy shows.","https://www.district.in"],
+  ["Zomato","Menus, photos and reviews for almost every restaurant, plus delivery to your hotel.","https://www.zomato.com/bangalore"],
+  ["Swiggy Dineout","Table bookings, often with a discount on the bill. Event tickets are under Scenes.","https://www.swiggy.com/dineout"],
+  ["EazyDiner","Table bookings and offers, strongest on upscale restaurants.","https://www.eazydiner.com"]
+];
+// [dish, vegetarian?, what it is, where to try]
+const DISHES=[
+  ["Masala dosa",1,"A crisp rice-and-lentil crêpe folded around spiced potato, with coconut chutney and sambar. The city's signature breakfast.","Any hotel's South Indian restaurant, or a traditional darshini café."],
+  ["Filter coffee",1,"Strong coffee with a little chicory, frothed by pouring between a steel tumbler and bowl. Karnataka grows most of India's coffee.","Everywhere. Specialty cafés serve single-estate beans from Chikmagalur and Coorg."],
+  ["Bisi bele bath",1,"Rice, lentils and vegetables slow-cooked with a special spice mix and finished with ghee. Karnataka's comfort food.","Most South Indian restaurants at lunch."],
+  ["Ghee roast & neer dosa",0,"From the coast around Mangaluru: chicken or prawns in a fiery red ghee-roast masala, with lacy rice crêpes to mop it up.","Karavalli on Residency Road, or any good coastal restaurant."],
+  ["Donne biryani",0,"Bengaluru-style biryani with herbs and short-grain rice, traditionally served in a cup made of areca leaf.","Restaurants serving Karnataka cuisine."],
+  ["Mysore pak",1,"A rich sweet of gram flour, sugar and lots of ghee, first made in the Mysuru palace kitchens.","Sweet shops across the city. The classic gift to take home."],
+  ["Craft beer",1,"Bengaluru kicked off India's craft-beer boom. Try at least one local brew.","Toit, Byg Brewski or Windmills (see above)."],
+  ["A modern tasting menu",0,"Chefs here are reinterpreting Karnataka ingredients with fine-dining technique.","Farmlore, or Nāvu (see above). Book weeks ahead."]
+];
+// [name, area, what, award]
+const SCENE=[
+  {t:"Fine dining & modern Indian",s:"The most talked-about tables, from Asia's 50 Best Restaurants 2026 and Condé Nast Traveller India's Top 50. Book ahead.",items:[
+    ["Farmlore","outside the city","An 18-seat farm-to-table tasting menu built on seasonal, local produce.","Asia's 50 Best 2026 · No. 83"],
+    ["Nāvu","","One of Bengaluru's most acclaimed new restaurants.","India Top 50 · No. 15"],
+    ["Karavalli","Residency Road","A long-loved restaurant for the coastal cooking of Karnataka and Kerala.",""],
+    ["Kopitiam Lah","","Singaporean and Malaysian comfort food, done properly.","India Top 50 · No. 21"]]},
+  {t:"Cocktail bars",s:"Two of the best bars in Asia are in Bengaluru.",items:[
+    ["Soka","Indiranagar","Inventive cocktails from a chef and bartender pairing.","Asia's 50 Best Bars 2026 · No. 18"],
+    ["Bar Spirit Forward","","Classic-leaning cocktails; try The Old Cuban.","Asia's 50 Best Bars 2026 · No. 30"]]},
+  {t:"Rooftops with a view",s:"Go for sunset, about 18:15 in January, and reserve a table.",items:[
+    ["Skyye","UB City","360-degree views over the city centre. Smart and pricey.",""],
+    ["The 13th Floor","MG Road","One of the city's original rooftop bars.",""],
+    ["High Ultra Lounge","World Trade Center","One of the highest rooftop bars in the city.",""],
+    ["Loft 38","Indiranagar","Creative cocktails and a good DJ.",""]]},
+  {t:"Craft breweries",s:"Bengaluru is often called India's pub capital.",items:[
+    ["Toit","Indiranagar","The brewpub that started it all in 2010. Try the Basmati Blonde.",""],
+    ["Byg Brewski","Hennur","One of the largest brewery spaces in India. Great for a big group.",""],
+    ["Windmills Craftworks","Whitefield","Live jazz and consistently good IPAs.",""],
+    ["The Biere Club","Lavelle Road","One of the city's first microbreweries, in the centre.",""]]},
+  {t:"Karaoke nights",s:"Nights change often. Check the venue's Instagram or District first.",items:[
+    ["Hard Rock Cafe","St Marks Road","Weekly karaoke night in a big, lively room.",""],
+    ["The Boozy Griffin","Koramangala","Separate Bollywood and English nights, close to the venue.",""],
+    ["Norebang","Indiranagar","Korean-style karaoke.",""],
+    ["Casa Karaoke","JP Nagar","Private karaoke rooms you can book for your group.",""]]}
+];
+function renderEat(){
+  $("#eat").innerHTML=`<div class="intro"><h2>Dine &amp; drink</h2>
+    <p>Bengaluru has two of Asia's best bars, a farm-to-table restaurant on Asia's 50 Best list, and a craft-beer scene that started India's. Locals book everything on apps.</p></div>
+    <div class="apps">${APPS.map(([n,d,u])=>`<a class="app" href="${u}" target="_blank" rel="noopener"><b>${n} ↗</b><span>${esc(d)}</span></a>`).join("")}</div>
+    <p class="hint">These apps may ask for an Indian mobile number to sign in. If yours doesn't work, your hotel concierge can book for you.</p>
+    <div class="scene">${SCENE.map(g=>`<div><h3>${esc(g.t)}</h3><p class="sub">${esc(g.s)}</p>
+      ${g.items.map(([n,a,w,aw])=>`<div class="vrow"><span class="nm"><a href="${gmap(n,a&&a!=="outside the city"?a:"")}" target="_blank" rel="noopener">${esc(n)}</a>${a?` <span class="ar">· ${esc(a)}</span>`:""}</span>${aw?`<span class="award">${esc(aw)}</span>`:""}<p>${esc(w)}</p></div>`).join("")}</div>`).join("")}</div>
+    <div class="intro"><h2>Must-eat foods in Bengaluru</h2>
+      <p><span class="vm veg"></span>Vegetarian &nbsp; <span class="vm nonveg"></span>Non-vegetarian. These green and brown marks are on menus and packets across India.</p></div>
+    <div class="dishes">${DISHES.map(([n,v,d,w])=>`<div class="dish"><h4><span class="vm ${v?"veg":"nonveg"}" aria-label="${v?"Vegetarian":"Non-vegetarian"}"></span>${esc(n)}</h4><p>${esc(d)}</p><span class="where">Where: ${esc(w)}</span></div>`).join("")}</div>`;
+}
+
+/* ---------- Stay ---------- */
+function avgMust(stay,hour,we){
+  const ms=Object.values(PLACES).filter(p=>p.tier==="must"&&p.kind!=="daytrip"&&p.kind!=="evening");
+  return Math.round(ms.reduce((s,p)=>s+travel(stay,p,hour,we).mid,0)/ms.length);
+}
+function renderStay(){
+  const ints=prefs.interests;
+  const scored=STAYS.map(s=>{
+    const v=travel(s,VENUE,H(8,30),false).mid, m=avgMust(s,H(10),true);
+    return{s,m,score:s.warn?-99:-v*1.2-m*.6+6*s.fit.filter(f=>ints.includes(f)).length+(s.fit.includes("close")?4:0)};
+  });
+  const bestId=[...scored].sort((a,b)=>b.score-a.score)[0].s.id;
+  $("#stay-p").innerHTML=`<div class="intro"><h2>Where to stay</h2>
+    <p>Hosur Road is slow in the morning, so the closer you stay to Christ University, the more time you save. Times are by cab on a weekday.</p></div>
+    <div class="stays">${scored.map(({s,m})=>{
+      const am=travel(s,VENUE,H(8,30),false),back=travel(VENUE,s,H(17,30),false),ap=travel(s,AIRPORT,H(22),false),k=STAY_IMG[s.id],src=imgSrc(k);
+      return`<div class="stay ${s.warn?"warn":""}">
+        <div class="ph wide">${src?`<img src="${src}" alt="${esc(CAPTION[k])}" loading="lazy">`:`<span class="blankname">${esc(s.name)}</span>`}</div>
+        <span class="pick">${s.id===bestId?"Best fit for you":s.id===prefs.stay?"Your choice":s.warn?"Not recommended":""}</span>
+        <h4>${esc(s.name)}</h4><p>${esc(s.blurb)}</p>
+        <div class="times"><span>To venue at 08:30</span><span class="c-${am.level}">${range(am)}</span>
+          <span>Back at 17:30</span><span class="c-${back.level}">${range(back)}</span>
+          <span>To must-sees, Sat morning</span><span>~${m} min</span>
+          <span>To airport at 22:00</span><span class="c-${ap.level}">${range(ap)}</span></div>
+        <p class="small">${esc(s.eg)}</p>
+        <div class="actions">${s.id===prefs.stay?"":`<button class="btn ghost" data-stay="${s.id}">Plan with this area</button>`}
+          <a class="small" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("hotels in "+s.name+" Bengaluru")}" target="_blank" rel="noopener">Hotels on Maps ↗</a></div></div>`;}).join("")}</div>`;
+  document.querySelectorAll("[data-stay]").forEach(b=>b.onclick=()=>{prefs.stay=b.dataset.stay;$("#stay").value=prefs.stay;save();renderAll();});
+}
+
+/* ---------- Travel & tips ---------- */
+let tv={origin:null,we:false,hour:10};
+function renderTravelBox(){
+  if(!tv.origin)tv.origin=prefs.stay;
+  const opts=[...STAYS.map(s=>[s.id,s.name]),["venue","ICDMAI venue"],["airport","Airport"]];
+  const org=tv.origin==="venue"?VENUE:tv.origin==="airport"?AIRPORT:STAYS.find(s=>s.id===tv.origin);
+  const dests=[VENUE,AIRPORT,...Object.values(PLACES)].filter(p=>p.id!==org.id);
+  const rows=dests.map(p=>({p,l:travel(org,p,H(tv.hour),tv.we)})).sort((a,b)=>a.l.mid-b.l.mid);
+  const hours=[5,7,9,11,14,17,19,22], hotel=stayObj(prefs.stay);
+  $("#tvBox").innerHTML=`<div class="intro"><h2>Travel times</h2>
+    <p>In Bengaluru, 6 km can take 15 minutes or an hour. Choose a starting point and a time to see how long a cab takes to everywhere else.</p></div>
+    <div class="controls">
+      <div class="f"><label for="tvOrigin">Starting from</label><select id="tvOrigin">${opts.map(([v,n])=>`<option value="${v}" ${v===tv.origin?"selected":""}>${esc(n)}</option>`).join("")}</select></div>
+      <div class="f"><label for="tvDay">Day</label><select id="tvDay"><option value="wd" ${!tv.we?"selected":""}>Weekday</option><option value="we" ${tv.we?"selected":""}>Weekend</option></select></div>
+      <div class="f"><label for="tvHour">Leaving at <span class="mono">${fmt(H(tv.hour))}</span></label><input type="range" id="tvHour" min="5" max="23" step="1" value="${tv.hour}"></div>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th>Destination</th><th>Km</th><th>Cab time</th><th>Traffic</th><th></th></tr></thead><tbody>
+      ${rows.map(({p,l})=>{const s=imgSrc(p.id);return`<tr><td>${s?`<img class="tdimg" src="${s}" alt="" loading="lazy">`:`<span class="tdimg"></span>`}${PLACES[p.id]?`<a href="#" data-place="${p.id}">${esc(p.name)}</a>`:esc(p.name)}</td><td class="num">${l.km.toFixed(1)}</td>
+        <td class="num c-${l.level}">${range(l)}</td><td><span class="dot bg-${l.level}"></span>${LVL[l.level]}</td>
+        <td><a href="${dirQ(org,p)}" target="_blank" rel="noopener">Live ↗</a></td></tr>`;}).join("")}
+    </tbody></table></div>
+    <div class="intro sub"><h2>Airport runs by hour</h2><p>From ${esc(STAYS.find(s=>s.id===prefs.stay).name)}, in minutes. Allow extra for weekday evening flights.</p></div>
+    <div class="tablewrap"><table><thead><tr><th></th>${hours.map(h=>`<th>${fmt(H(h))}</th>`).join("")}</tr></thead><tbody>
+      ${[["To airport, weekday",hotel,AIRPORT,false],["To airport, weekend",hotel,AIRPORT,true],["From airport, weekday",AIRPORT,hotel,false],["From airport, weekend",AIRPORT,hotel,true]]
+        .map(([n,a,b,we])=>`<tr><td>${n}</td>${hours.map(h=>{const l=travel(a,b,H(h),we);return`<td class="num c-${l.level}">${l.lo}–${l.hi}</td>`;}).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <p class="small">Estimates from distance and typical traffic for each hour, not live data.</p>`;
+  $("#tvOrigin").onchange=e=>{tv.origin=e.target.value;renderTravelBox();};
+  $("#tvDay").onchange=e=>{tv.we=e.target.value==="we";renderTravelBox();};
+  $("#tvHour").oninput=e=>{tv.hour=+e.target.value;renderTravelBox();$("#tvHour").focus();};
+}
+
+const GUIDES_HTML=`<div class="intro"><h2>Guides &amp; private tours</h2>
+  <p>Established, reputable ways to see the city with someone who knows it. A chauffeur-driven car for the day is usually the most comfortable choice.</p></div>
+  <div class="guides">
+    <div class="guide"><span class="label">Easiest</span><h4>Your hotel concierge</h4>
+      <p>Five-star hotels arrange chauffeur-driven cars, private guides, spa bookings and restaurant tables. Ask on arrival.</p></div>
+    <div class="guide"><span class="label">Private · Since 1881 in India</span><h4>Thomas Cook India</h4>
+      <p>One of India's oldest travel companies, with sister brands SOTC and Travel Corporation (India). Private car, driver and guide, or a Mysuru day trip.</p>
+      <a class="small" href="https://www.thomascook.in" target="_blank" rel="noopener">thomascook.in ↗</a></div>
+    <div class="guide"><span class="label">Government · State tourism</span><h4>KSTDC</h4>
+      <p>Karnataka State Tourism Development Corporation runs coach tours of the city and trips to Mysuru.</p>
+      <span class="contact">080-4334 4334</span><span class="contact">info@kstdc.co</span>
+      <a class="small" href="https://kstdc.co" target="_blank" rel="noopener">kstdc.co ↗</a></div>
+    <div class="guide"><span class="label">Government · Licensed guides</span><h4>Karnataka Tourism</h4>
+      <p>The state's directory of licensed guides, with licence numbers and expiry dates. Ask to see the licence card.</p>
+      <span class="contact">+91 80 2235 2828</span>
+      <a class="small" href="https://karnatakatourism.org/en/tourist-guides" target="_blank" rel="noopener">Find a licensed guide ↗</a></div>
+    <div class="guide"><span class="label">Walking tours · Since 2005</span><h4>BangaloreWALKS</h4>
+      <p>Heritage walks led by founder Arun Pai and his team: more than 1,500 walks for over 30,000 people. Can be tailored for a group of speakers.</p>
+      <a class="small" href="https://www.bangalorewalks.com" target="_blank" rel="noopener">bangalorewalks.com ↗</a></div>
+  </div>
+  <div class="warnbox"><b>Watch out for fakes.</b> KSTDC warns that fake websites use its name. Book only through the phone number or email above. Ignore touts at the airport, and avoid anyone trading as "Cox &amp; Kings": the original company collapsed in 2019.</div>`;
+
+function renderWeatherBox(){
+  const a=parseD(prefs.arrDate),d=parseD(prefs.depDate),rows=[];
+  if(d>=a)for(let x=new Date(a);x<=d&&rows.length<21;x.setDate(x.getDate()+1))rows.push(new Date(x));
+  const m=a.getMonth(),txt=CLIMATE[m][3],cool=m===0||m===11||m===1;
+  $("#wxBox").innerHTML=`<div class="intro"><h2>Weather for your dates</h2>
+    <p>${esc(txt)} These are long-term averages for ${MON[m]}. Check a forecast the week before you fly.</p></div>
+    <div class="tablewrap"><table><thead><tr><th>Date</th><th>High / low</th><th>Sunrise</th><th>Sunset</th><th>Plan around it</th></tr></thead><tbody>
+    ${rows.map(x=>{const mm=x.getMonth(),c=CLIMATE[mm],s=SUN[mm];
+      const adv=c[2]>=7?"Sights in the morning; museums or cafés after 15:00, when rain usually comes":c[0]>=32?"Be outdoors before 11:00 and after 16:00":"Good for being outdoors all day. Mornings are crisp and the midday sun is strong";
+      return`<tr><td>${nice(x)}${CONF.dates.includes(iso(x))?' <span class="must">ICDMAI</span>':""}</td><td class="num">${c[0]}° / ${c[1]}°C</td><td class="num">${s[0]}</td><td class="num">${s[1]}</td><td style="white-space:normal;min-width:220px">${adv}</td></tr>`;}).join("")}
+    </tbody></table></div>
+    <div class="tips">
+      <div><h4>What to pack</h4><ul>
+        ${cool?"<li>A light sweater for mornings and evenings (around 15 °C)</li><li>A warm layer for Nandi Hills at dawn (close to 10 °C)</li><li>Sunscreen and sunglasses</li>":"<li>A compact umbrella</li><li>Light, breathable clothes</li>"}
+        <li>Smart-casual for rooftop bars (some have a dress code)</li><li>Clothes that cover shoulders and knees for temples</li></ul></div>
+      <div><h4>Getting around</h4><ul>
+        <li>Uber, Ola and Namma Yatri (for autos) all work well</li>
+        <li>At the airport, use the app-cab pickup zone or the prepaid taxi counter</li>
+        <li>BMTC Vayu Vajra buses run from the airport to most of the city</li>
+        <li>Avoid Silk Board junction and the Outer Ring Road at peak hours</li>
+        <li>Hosur Road by the venue is slow 08:00–10:30 and 17:30–20:30</li></ul></div>
+      <div><h4>Money and safety</h4><ul>
+        <li>Cards work in hotels and restaurants. Keep some cash for autos and small shops.</li>
+        <li>Foreign visitors can pay by UPI through the UPI One World wallet</li>
+        <li>Drink bottled or filtered water</li>
+        <li>Emergency number: 112</li></ul></div>
+      <div class="phr"><h4>Five words of Kannada</h4>
+        <div><b>Namaskara</b><span class="small">hello</span></div>
+        <div><b>Dhanyavadagalu</b><span class="small">thank you</span></div>
+        <div><b>Oota aytha?</b><span class="small">have you eaten? (a friendly hello)</span></div>
+        <div><b>Swalpa adjust maadi</b><span class="small">please adjust a little, the city's unofficial motto</span></div>
+        <div><b>Saaku</b><span class="small">that's enough (when someone keeps serving you food)</span></div></div>
+    </div>`;
+}
+function renderEssentials(){
+  $("#travel").innerHTML=`<div id="tvBox" style="display:grid;gap:30px"></div><div style="display:grid;gap:28px">${GUIDES_HTML}</div><div id="wxBox" style="display:grid;gap:30px"></div>`;
+  renderTravelBox();renderWeatherBox();
+}
+
+function renderCredits(){
+  $("#credits").innerHTML=Object.keys(CREDITS).map(k=>`<li>${esc(CAPTION[k]||k)}: <a href="${CREDITS[k][2]}" target="_blank" rel="noopener">${esc(credit(k))}</a></li>`).join("");
+}
+
+function renderAll(){renderPlan();renderPlaces();renderEat();renderStay();renderEssentials();
+  const s=STAYS.find(x=>x.id===prefs.stay),v=travel(s,VENUE,H(8,30),false);
+  $("#stayHint").textContent=`From ${s.name}: ${range(v)} to the venue on a weekday morning.`;}
+
+/* ---------- Form wiring ---------- */
+function initForm(){
+  $("#stay").innerHTML=STAYS.map(s=>`<option value="${s.id}">${esc(s.name)}${s.warn?" (far)":""}</option>`).join("");
+  $("#interests").innerHTML=INTERESTS.map(([k,n])=>`<label class="chip"><input type="checkbox" id="int-${k}" value="${k}">${n}</label>`).join("");
+  $("#speaker").value=prefs.speaker;$("#arrDate").value=prefs.arrDate;$("#arrTime").value=prefs.arrTime;
+  $("#depDate").value=prefs.depDate;$("#depTime").value=prefs.depTime;$("#flightType").value=prefs.flightType;
+  if(!STAYS.some(s=>s.id===prefs.stay))prefs.stay=DEFAULTS.stay;
+  $("#stay").value=prefs.stay;$("#pace").value=prefs.pace;
+  INTERESTS.forEach(([k])=>$("#int-"+k).checked=prefs.interests.includes(k));
+  $("#dayTrips").checked=prefs.dayTrips;$("#confEvenings").checked=prefs.confEvenings;
+  const read=()=>{
+    prefs.speaker=$("#speaker").value;prefs.arrDate=$("#arrDate").value||DEFAULTS.arrDate;prefs.arrTime=$("#arrTime").value||DEFAULTS.arrTime;
+    prefs.depDate=$("#depDate").value||DEFAULTS.depDate;prefs.depTime=$("#depTime").value||DEFAULTS.depTime;prefs.flightType=$("#flightType").value;
+    prefs.stay=$("#stay").value;prefs.pace=$("#pace").value;prefs.interests=INTERESTS.map(([k])=>k).filter(k=>$("#int-"+k).checked);
+    prefs.dayTrips=$("#dayTrips").checked;prefs.confEvenings=$("#confEvenings").checked;
+    const bad=parseD(prefs.depDate)<parseD(prefs.arrDate);$("#dateErr").hidden=!bad;$("#dateErr").textContent=bad?"Your leaving date needs to be on or after your arrival date.":"";
+    tv.origin=null;save();renderAll();
+  };
+  document.querySelectorAll(".tripcard input, .tripcard select").forEach(el=>el.addEventListener(el.type==="text"?"input":"change",read));
+  const tabs=[...document.querySelectorAll("[role=tab]")];
+  const show=t=>{tabs.forEach(x=>x.setAttribute("aria-selected",x===t?"true":"false"));
+    document.querySelectorAll("[role=tabpanel]").forEach(p=>p.hidden=p.id!==t.getAttribute("aria-controls"));};
+  tabs.forEach(t=>t.onclick=()=>{show(t);const nav=document.querySelector("nav.sections");if(nav.getBoundingClientRect().top<0)nav.scrollIntoView();});
+  const h=location.hash.slice(1),byHash={plan:"tab-plan",places:"tab-places",eat:"tab-eat",stay:"tab-stay",travel:"tab-travel"};
+  if(byHash[h])show($("#"+byHash[h]));
+}
+initForm();renderAll();renderCredits();
+</script>
+
+</html>
